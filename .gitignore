@@ -1,3 +1,15 @@
+### Hugo ###
+# Generated files by hugo
+site/public/
+site/resources/_gen/
+hugo_stats.json
+
+# Executable may be added to repository
+site/hugo.exe
+site/hugo.darwin
+site/hugo.linux
+
+### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -50,6 +62,7 @@ coverage.xml
 *.py,cover
 .hypothesis/
 .pytest_cache/
+pytestdebug.log
 
 # Translations
 *.mo
@@ -70,6 +83,7 @@ instance/
 
 # Sphinx documentation
 docs/_build/
+doc/_build/
 
 # PyBuilder
 target/
@@ -109,6 +123,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+pythonenv*
 
 # Spyder project settings
 .spyderproject
@@ -116,9 +131,6 @@ venv.bak/
 
 # Rope project settings
 .ropeproject
-
-# mkdocs documentation
-/site
 
 # mypy
 .mypy_cache/
@@ -128,5 +140,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Unignore Swagger files
-!docs/swagger/dist/
+# pytype static type analyzer
+.pytype/
+
+# profiling data
+.prof
