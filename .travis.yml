@@ -1,3 +1,5 @@
+language: generic
+
 stages:
   - name: web
     if: branch = master
