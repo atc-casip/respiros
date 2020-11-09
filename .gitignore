@@ -129,4 +129,4 @@ dmypy.json
 .pyre/
 
 # Unignore Swagger files
-!docs/dist/
+!docs/swagger/dist/
