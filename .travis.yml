@@ -1,30 +1,24 @@
 language: generic
 
 stages:
-  - name: web
+  - name: Docs
     if: branch = master
 
 jobs:
   include:
-    - stage: web
-      name: "Install Hugo"
-      script:
-        - curl -LO
-        https://github.com/gohugoio/hugo/releases/download/v0.78.1/hugo_0.78.1_Linux-64bit.deb
+    - stage: Docs
+      install:
+        - curl -LO https://github.com/gohugoio/hugo/releases/download/v0.78.1/hugo_0.78.1_Linux-64bit.deb
         - sudo dpkg -i hugo_0.78.1_Linux-64bit.deb
+        - rm hugo_0.78.1_Linux-64bit.deb
         - cd site
-
-    - name: "Install npm dependencies"
-      script:
         - npm install -D --save autoprefixer
         - npm install -D --save postcss
         - npm install -D --save postcss-cli
-
-    - name: "Generate site"
-      script: hugo
-
-    - name: "Deploy to GitHub Pages"
-      provider: pages
-      skip_cleanup: true
-      github_token: $GITHUB_TOKEN
-      local_dir: public
+      script: 
+        - hugo
+      deploy:
+        provider: pages
+        token: $GITHUB_TOKEN
+        local-dir: site/public
+        skip-cleanup: true

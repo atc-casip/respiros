@@ -9,6 +9,10 @@ site/hugo.exe
 site/hugo.darwin
 site/hugo.linux
 
+### NodeJS ###
+site/package-lock.json
+site/node_modules
+
 ### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
