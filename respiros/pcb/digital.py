@@ -7,7 +7,7 @@ import time
 
 import pigpio
 
-from respir_os.pcb import pi
+from respiros.pcb import pi
 
 
 class DHT:

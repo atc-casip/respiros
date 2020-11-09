@@ -9,7 +9,7 @@ import atexit
 
 import pigpio
 
-from respir_os.pcb import pi
+from respiros.pcb import pi
 
 
 class ADC:
