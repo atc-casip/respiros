@@ -1,9 +1,5 @@
 language: generic
 
-stages:
-  - name: Docs
-    if: branch = master
-
 jobs:
   include:
     - stage: Docs
