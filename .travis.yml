@@ -1,13 +1,17 @@
 language: generic
 
+addons:
+  snaps:
+    - name: hugo
+      channel: extended
+
 jobs:
   include:
     - stage: Docs
-      install:
-        - curl -LO https://github.com/gohugoio/hugo/releases/download/v0.78.1/hugo_0.78.1_Linux-64bit.deb
-        - sudo dpkg -i hugo_0.78.1_Linux-64bit.deb
-        - rm hugo_0.78.1_Linux-64bit.deb
+      before_install:
         - cd site
+        - hugo version
+      install:
         - npm install -D --save autoprefixer
         - npm install -D --save postcss
         - npm install -D --save postcss-cli
