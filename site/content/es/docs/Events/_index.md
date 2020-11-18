@@ -10,11 +10,8 @@ Para permitir la extensión de la funcionalidad del sistema y su integración co
 otras plataformas, Respir-OS publica los eventos que tienen lugar durante su
 funcionamiento mediante WebSockets. Los clientes pueden conectarse al socket
 usando librerías como [Socket.IO](https://socket.io/) para recibir los eventos
-cuando sucedan y poder trabajar sobre sus datos.
-
-En concreto, los eventos se publican en el espacio de nombres `/respir-os`. En
-esta sección, se detallan todos los eventos que genera el respirador y sus datos
-asociados.
+cuando sucedan y poder trabajar sobre sus datos. En esta sección, se detallan
+todos los eventos que genera el respirador y sus datos asociados.
 
 ## `parameters`
 

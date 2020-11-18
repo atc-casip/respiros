@@ -10,11 +10,8 @@ Respir-OS publishes the events that take place during its operation so the
 system's functionality can be extended and integrated with other platforms.
 These events are published using WebSockets. Clients can connect to the socket
 using libraries like [Socket.IO](https://socket.io/) and start receiving events
-and their data.
-
-All the events that external applications can listen to are published on the
-`/respir-os` namespace. In this section, these events and their data are
-explained in detail.
+and their data. In this section, these events and their data are explained in
+detail.
 
 ## `parameters`
 
