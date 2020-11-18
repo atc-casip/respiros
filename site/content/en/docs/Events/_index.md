@@ -81,10 +81,10 @@ __Example__
 }
 ```
 
-## `reading`
+## `readings`
 
 The system reads the values given by the sensors with very high frequency. These
-readings are published in events with much lower frequency so the system doesn
+readings are published in events with much lower frequency so the system doesn't
 overload. Each reading has the following variables:
 
 - `timestamp`: Unix time in which the reading was made.

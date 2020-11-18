@@ -88,7 +88,7 @@ __Ejemplo__
 }
 ```
 
-## `reading`
+## `readings`
 
 El sistema realiza lecturas de los distintos sensores que posee con una
 frecuencia muy alta. Con menor frecuencia, el sistema lanza un evento con las
