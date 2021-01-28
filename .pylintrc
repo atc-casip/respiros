@@ -1,0 +1,12 @@
+[TYPECHECK]
+
+generated-members= PUB, SUB, REQ, REP, NOBLOCK
+
+[MESSAGES CONTROL]
+
+disable=
+    invalid-name,
+    too-few-public-methods,
+    too-many-instance-attributes,
+    arguments-differ,
+    too-many-arguments
