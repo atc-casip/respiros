@@ -6,11 +6,8 @@ import logging
 import time
 from typing import Dict
 
-import numpy as np
 import zmq
 from controls.context import Context
-from numpy import random
-from scipy import integrate
 
 from .events import Event, StartOperationAssisted, StartOperationControlled
 from .state import State
@@ -36,13 +33,14 @@ class OperationControlled(State):
         self.trigger = payload["trigger"]
         self.from_standby = payload["from_standby"]
 
-        self.gauge_time_saved = 0
+        self.time_old = time.time()
         self.oxygen_time_saved = 0
         self.dht_time_saved = 0
 
-        self.volume = None
+        self.volume = 0.0
         self.gauge_pressure = None
-        self.airflow_pressure = None
+        self.airflow_pressure = 0
+        self.airflow_pressure_old = 0
         self.oxygen_percentage = None
         self.atm_pressure = None
         self.temperature_box = None
@@ -52,22 +50,18 @@ class OperationControlled(State):
     def transitions(self) -> Dict[Event, State]:
         return {StartOperationAssisted: OperationAssisted}
 
-    def get_volume(self, time_previous, time_now):
-        x = np.arange(25001)
-        y = random.rand(25001)
-        I = integrate.simpson(y, x)
-        return I
-
     def read_and_send_sensors(self, time_now):
         # Read Sensors
-        if time_now >= (self.gauge_time_saved + GAUGE_PRESSION_DIFF):
+        if time_now >= (self.time_old + GAUGE_PRESSION_DIFF):
             self.gauge_pressure = self.ctx.gauge_ps.read()
+            self.airflow_pressure_old = self.airflow_pressure
             self.airflow_pressure = self.ctx.airflow_ps.read()
-            self.gauge_time_saved = time_now
-            self.volume = self.get_volume(self.gauge_time_saved, time_now)
-
-            # TODO: Change reading information flow
-            # Send sensors data
+            self.volume += (
+                (time_now - self.time_old)
+                * (self.airflow_pressure + self.airflow_pressure_old)
+                / 2
+            )
+            self.time_old = time_now
 
         if time_now >= self.oxygen_time_saved + OXYGEN_PRESSION_DIFF:
             self.oxygen_percentage = self.ctx.oxygen_sensor.read()
@@ -135,7 +129,7 @@ class OperationControlled(State):
 
             self.read_and_send_sensors(time.time())
 
-            # TODO: Sleep for a bit so we don't hog the CPU
+            time.sleep(0.0001)
 
 
 class OperationAssisted(State):

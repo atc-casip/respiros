@@ -52,7 +52,7 @@ class Messenger:
         sync.bind(PUB_SYNC_ADDR)
 
         subs = 0
-        while subs < 2:
+        while subs < 1:
             msg = sync.recv_string()
             if msg is not None:
                 subs += 1

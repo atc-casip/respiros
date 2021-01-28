@@ -1,5 +1,7 @@
 import random
 
+from .signals import flux, pressure
+
 
 class TestServo:
     def set_angle(self, angle: int):
@@ -28,10 +30,24 @@ class TestOxygen:
 
 
 class TestGauge:
+
+    counter = 0
+
     def read(self):
-        return random.randint(0, 40)
+        value = pressure[self.counter]
+        self.counter += 1
+        if self.counter == len(pressure):
+            self.counter = 0
+        return value
 
 
 class TestAirflow:
+
+    counter = 0
+
     def read(self):
-        return random.randint(-50, 120)
+        value = flux[self.counter]
+        self.counter += 1
+        if self.counter == len(flux):
+            self.counter = 0
+        return value

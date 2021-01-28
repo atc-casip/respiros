@@ -42,7 +42,7 @@ class PlotCanvas(sg.Canvas):
         self.ax_pressure.set_title("PRESION")
         self.ax_pressure.set_ylabel("cmH\N{SUBSCRIPT TWO}O")
         self.ax_pressure.set_xlim(0, 1000)
-        self.ax_pressure.set_ylim(0, 40)
+        self.ax_pressure.set_ylim(0, 21)
         self.ax_pressure.grid()
         self.ax_pressure.tick_params(
             axis="x",  # changes apply to the x-axis
@@ -56,7 +56,7 @@ class PlotCanvas(sg.Canvas):
         self.ax_airflow.set_title("FLUJO")
         self.ax_airflow.set_ylabel("l/min")
         self.ax_airflow.set_xlim(0, 1000)
-        self.ax_airflow.set_ylim(-50, 120)
+        self.ax_airflow.set_ylim(-20, 20)
         self.ax_airflow.grid()
         self.ax_airflow.tick_params(
             axis="x",  # changes apply to the x-axis
@@ -70,7 +70,7 @@ class PlotCanvas(sg.Canvas):
         self.ax_volume.set_title("VOLUMEN")
         self.ax_volume.set_ylabel("ml")
         self.ax_volume.set_xlim(0, 1000)
-        self.ax_volume.set_ylim(0, 1000)
+        self.ax_volume.set_ylim(-1, 15)
         self.ax_volume.grid()
         self.ax_volume.tick_params(
             axis="x",  # changes apply to the x-axis
