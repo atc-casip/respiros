@@ -12,7 +12,7 @@ from .context import Context
 from .sockets import Messenger
 
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(filename="gui.log", filemode="w", level=logging.INFO)
 
 msg = Messenger()
 ctx = Context()

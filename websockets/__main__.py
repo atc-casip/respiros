@@ -56,5 +56,5 @@ class MessageManager(object):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(filename="websockets.log", filemode="w", level=logging.INFO)
     msg = MessageManager()

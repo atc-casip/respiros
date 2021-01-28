@@ -32,7 +32,7 @@ OXYGEN_CHANNEL = 2
 
 if __name__ == "__main__":
     # TODO: Use different configurations for dev and prod environments
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(filename="controls.log", filemode="w", level=logging.INFO)
 
     """
     # Create Pi instance
