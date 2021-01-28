@@ -1,6 +1,6 @@
 [TYPECHECK]
 
-generated-members= PUB, SUB, REQ, REP, NOBLOCK
+generated-members= PUB, SUB, REQ, REP, NOBLOCK, UNSUBSCRIBE
 
 [MESSAGES CONTROL]
 

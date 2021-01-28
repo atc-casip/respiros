@@ -10,10 +10,11 @@ from typing import Dict, Tuple
 import zmq
 
 PUB_ADDR = "ipc:///tmp/monitor"
-PUB_SYNC_ADDR = "ipc:///tmp/sync-monitor"
-
 SUB_ADDR = "ipc:///tmp/operation"
-SUB_SYNC_ADDR = "ipc:///tmp/sync-operation"
+
+SYNC_CONTROLS = "ipc:///tmp/sync-controls"
+SYNC_GUI = "ipc:///tmp/sync-gui"
+SYNC_WEBSOCKETS = "ipc:///tmp/sync-websockets"
 
 
 class Messenger:
@@ -53,31 +54,50 @@ class Messenger:
         Wait for the required subscribers.
         """
 
-        sync = self.ctx.socket(zmq.REP)
-        sync.bind(PUB_SYNC_ADDR)
+        sync_gui = self.ctx.socket(zmq.REP)
+        sync_gui.bind(SYNC_GUI)
 
-        subs = 0
-        while subs < 1:
-            msg = sync.recv_string()
-            if msg is not None:
-                subs += 1
-                sync.send_string("ok")
-                logging.info("Process <%s> subscribed", msg)
+        sync_websockets = self.ctx.socket(zmq.REP)
+        sync_websockets.bind(SYNC_WEBSOCKETS)
 
-        sync.close()
+        poller = zmq.Poller()
+        poller.register(sync_gui, zmq.POLLIN)
+        poller.register(sync_websockets, zmq.POLLIN)
+
+        subscribers = []
+        while len(subscribers) < 2:
+            self.pub.send_string("sync")
+
+            try:
+                sockets = dict(poller.poll(timeout=0))
+            except KeyboardInterrupt:
+                break
+
+            if sync_gui in sockets and sync_gui not in subscribers:
+                subscribers.append(sync_gui)
+                logging.info("GUI process subscribed")
+
+            if sync_websockets in sockets and sync_websockets not in subscribers:
+                subscribers.append(sync_websockets)
+                logging.info("WebSockets process subscribed")
+
+        sync_gui.close()
+        sync_websockets.close()
 
     def __sync_sub(self):
         """
         Synchronize with operation publisher.
         """
 
+        self.sub.setsockopt_string(zmq.SUBSCRIBE, "sync")
         sync = self.ctx.socket(zmq.REQ)
-        sync.connect(SUB_SYNC_ADDR)
+        sync.connect(SYNC_CONTROLS)
 
+        self.sub.recv_string()
         sync.send_string("controls")
-        sync.recv_string()
         logging.info("Subscribed to operation messages")
 
+        self.sub.setsockopt_string(zmq.UNSUBSCRIBE, "sync")
         sync.close()
 
     def send(self, topic: str, body: Dict):
