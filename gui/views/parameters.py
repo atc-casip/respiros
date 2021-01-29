@@ -8,7 +8,7 @@ import PySimpleGUI as sg
 from gui.components import IESlider, NumericSlider
 from gui.config import cfg
 from gui.context import Context
-from gui.sockets import Messenger
+from gui.messenger import Messenger
 
 from .view import View
 

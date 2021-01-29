@@ -11,7 +11,7 @@ import controls.pcb as pcb
 import controls.states as states
 import controls.test_pcb as test_pcb
 from controls.context import Context
-from controls.sockets import Messenger
+from controls.messenger import Messenger
 
 SERVO_GPIO = 15
 SERVO_MIN_WIDTH = 500

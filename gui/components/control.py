@@ -7,7 +7,7 @@ from typing import Dict, List, Optional
 import PySimpleGUI as sg
 from gui.config import cfg
 from gui.context import Context
-from gui.sockets import Messenger
+from gui.messenger import Messenger
 
 from .sliders import IESlider, NumericSlider
 

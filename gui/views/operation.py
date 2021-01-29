@@ -7,7 +7,7 @@ from typing import Dict, Optional
 import zmq
 from gui.components import ControlPane, MonitorBar, PlotCanvas
 from gui.context import Context
-from gui.sockets import Messenger
+from gui.messenger import Messenger
 
 from .view import View
 

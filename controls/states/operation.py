@@ -94,6 +94,7 @@ class OperationControlled(State):
                             "pressure": self.gauge_pressure,
                             "airflow": self.airflow_pressure,
                             "volume": self.volume,
+                            "timestamp": self.time_old,
                         },
                     )
                 if topic == "operation":

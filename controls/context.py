@@ -5,7 +5,7 @@ System context.
 from dataclasses import dataclass
 
 import controls.pcb as pcb
-from controls.sockets import Messenger
+from controls.messenger import Messenger
 
 
 @dataclass

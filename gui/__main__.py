@@ -9,7 +9,7 @@ import PySimpleGUI as sg
 import gui.views as views
 
 from .context import Context
-from .sockets import Messenger
+from .messenger import Messenger
 
 
 logging.basicConfig(filename="gui.log", filemode="w", level=logging.INFO)
@@ -37,7 +37,7 @@ current_view = routes["/"]
 current_view.set_up(ctx)
 current_view.update(visible=True)
 while True:
-    event, values = window.read(timeout=10)
+    event, values = window.read(timeout=20)
     resp = current_view.handle_event(event, values, ctx, msg)
     if resp is not None:
         next_view = routes[resp]
