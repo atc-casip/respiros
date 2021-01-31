@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <url>
+    <loc>https://atc-casip.github.io/respiros/es/docs/events/</loc>
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="https://atc-casip.github.io/respiros/docs/events/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="es"
+                href="https://atc-casip.github.io/respiros/es/docs/events/"
+                />
+  </url>
+  
+  <url>
+    <loc>https://atc-casip.github.io/respiros/es/docs/</loc>
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="https://atc-casip.github.io/respiros/docs/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="es"
+                href="https://atc-casip.github.io/respiros/es/docs/"
+                />
+  </url>
+  
+  <url>
+    <loc>https://atc-casip.github.io/respiros/es/categories/</loc>
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="https://atc-casip.github.io/respiros/categories/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="es"
+                href="https://atc-casip.github.io/respiros/es/categories/"
+                />
+  </url>
+  
+  <url>
+    <loc>https://atc-casip.github.io/respiros/es/</loc>
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="https://atc-casip.github.io/respiros/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="es"
+                href="https://atc-casip.github.io/respiros/es/"
+                />
+  </url>
+  
+  <url>
+    <loc>https://atc-casip.github.io/respiros/es/tags/</loc>
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="https://atc-casip.github.io/respiros/tags/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="es"
+                href="https://atc-casip.github.io/respiros/es/tags/"
+                />
+  </url>
+  
+</urlset>
