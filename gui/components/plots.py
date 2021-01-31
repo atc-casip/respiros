@@ -29,67 +29,84 @@ class PlotCanvas(sg.Canvas):
     def draw(self):
         """Draw the plots on the canvas."""
 
-        # Create figure and subplots
-        self.fig, [
-            self.ax_pressure,
-            self.ax_airflow,
-            self.ax_volume,
-        ] = plt.subplots(3, 1, constrained_layout=True)
-        self.fig.set_figheight(6.5)
-        self.fig.set_figwidth(8)
+        with plt.rc_context(
+            {
+                "figure.facecolor": "black",
+                "axes.facecolor": "black",
+                "axes.edgecolor": "white",
+                "axes.titlecolor": "white",
+                "axes.labelcolor": "white",
+                "xtick.color": "white",
+                "ytick.color": "white",
+            }
+        ):
+            # Create figure and subplots
+            self.fig, [
+                self.ax_pressure,
+                self.ax_airflow,
+                self.ax_volume,
+            ] = plt.subplots(3, 1, constrained_layout=True)
+            self.fig.set_figheight(6.5)
+            self.fig.set_figwidth(8)
 
-        # Configure pressure subplot
-        self.ax_pressure.set_title("PRESION")
-        self.ax_pressure.set_ylabel("cmH\N{SUBSCRIPT TWO}O")
-        self.ax_pressure.set_xlim(0, 1000)
-        self.ax_pressure.set_ylim(0, 21)
-        self.ax_pressure.grid()
-        self.ax_pressure.tick_params(
-            axis="x",  # changes apply to the x-axis
-            which="both",  # both major and minor ticks are affected
-            bottom=False,  # ticks along the bottom edge are off
-            top=False,  # ticks along the top edge are off
-            labelbottom=False,
-        )
+            # Configure pressure subplot
+            self.ax_pressure.set_title("PRESION")
+            self.ax_pressure.set_ylabel("cmH\N{SUBSCRIPT TWO}O")
+            self.ax_pressure.set_xlim(0, 1000)
+            self.ax_pressure.set_ylim(0, 21)
+            self.ax_pressure.grid()
+            self.ax_pressure.tick_params(
+                axis="x",  # changes apply to the x-axis
+                which="both",  # both major and minor ticks are affected
+                bottom=False,  # ticks along the bottom edge are off
+                top=False,  # ticks along the top edge are off
+                labelbottom=False,
+            )
 
-        # Configure airflow subplot
-        self.ax_airflow.set_title("FLUJO")
-        self.ax_airflow.set_ylabel("l/min")
-        self.ax_airflow.set_xlim(0, 1000)
-        self.ax_airflow.set_ylim(-20, 20)
-        self.ax_airflow.grid()
-        self.ax_airflow.tick_params(
-            axis="x",  # changes apply to the x-axis
-            which="both",  # both major and minor ticks are affectedOperation.canvas.
-            bottom=False,  # ticks along the bottom edge are off
-            top=False,  # ticks along the top edge are off
-            labelbottom=False,
-        )
+            # Configure airflow subplot
+            self.ax_airflow.set_title("FLUJO")
+            self.ax_airflow.set_ylabel("l/min")
+            self.ax_airflow.set_xlim(0, 1000)
+            self.ax_airflow.set_ylim(-20, 20)
+            self.ax_airflow.grid()
+            self.ax_airflow.tick_params(
+                axis="x",  # changes apply to the x-axis
+                which="both",  # both major and minor ticks are affectedOperation.canvas.
+                bottom=False,  # ticks along the bottom edge are off
+                top=False,  # ticks along the top edge are off
+                labelbottom=False,
+            )
 
-        # Configure volume subplot
-        self.ax_volume.set_title("VOLUMEN")
-        self.ax_volume.set_ylabel("ml")
-        self.ax_volume.set_xlim(0, 1000)
-        self.ax_volume.set_ylim(-1, 15)
-        self.ax_volume.grid()
-        self.ax_volume.tick_params(
-            axis="x",  # changes apply to the x-axis
-            which="both",  # both major and minor ticks are affected
-            bottom=False,  # ticks along the bottom edge are off
-            top=False,  # ticks along the top edge are off
-            labelbottom=False,
-        )
+            # Configure volume subplot
+            self.ax_volume.set_title("VOLUMEN")
+            self.ax_volume.set_ylabel("ml")
+            self.ax_volume.set_xlim(0, 1000)
+            self.ax_volume.set_ylim(-1, 15)
+            self.ax_volume.grid()
+            self.ax_volume.tick_params(
+                axis="x",  # changes apply to the x-axis
+                which="both",  # both major and minor ticks are affected
+                bottom=False,  # ticks along the bottom edge are off
+                top=False,  # ticks along the top edge are off
+                labelbottom=False,
+            )
 
-        # Create GUI element
-        self.graph = FigureCanvasTkAgg(self.fig, self.TKCanvas)
-        self.graph.draw()
-        self.graph.get_tk_widget().pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=1)
-        self.background = self.graph.copy_from_bbox(self.fig.bbox)
+            # Create GUI element
+            self.graph = FigureCanvasTkAgg(self.fig, self.TKCanvas)
+            self.graph.draw()
+            self.graph.get_tk_widget().pack(
+                side=tkinter.TOP, fill=tkinter.BOTH, expand=1
+            )
+            self.background = self.graph.copy_from_bbox(self.fig.bbox)
 
-        # Create dynamic lines
-        (self.ln_pressure,) = self.ax_pressure.plot(0, animated=True, color="purple")
-        (self.ln_airflow,) = self.ax_airflow.plot(0, animated=True, color="red")
-        (self.ln_volume,) = self.ax_volume.plot(0, animated=True, color="blue")
+            # Create dynamic lines
+            (self.ln_pressure,) = self.ax_pressure.plot(
+                0, animated=True, color="violet"
+            )
+            (self.ln_airflow,) = self.ax_airflow.plot(
+                0, animated=True, color="greenyellow"
+            )
+            (self.ln_volume,) = self.ax_volume.plot(0, animated=True, color="cyan")
 
     def update_plots(
         self,

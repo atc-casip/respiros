@@ -17,7 +17,7 @@ logging.basicConfig(filename="gui.log", filemode="w", level=logging.INFO)
 msg = Messenger()
 ctx = Context()
 
-sg.theme("Reddit")
+sg.theme("Black")
 
 routes = {
     "/": views.ChecksView(),
