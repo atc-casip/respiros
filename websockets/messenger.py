@@ -55,9 +55,12 @@ class Messenger:
         sync = self.ctx.socket(zmq.REQ)
         sync.connect(SYNC)
 
-        self.monitor_sub.recv_string()
-        sync.send_string("websockets")
-        logging.info("Subscribed to monitoring messages")
+        while True:
+            msg = self.monitor_sub.recv_string()
+            if msg == "sync-websockets":
+                sync.send_string("websockets")
+                logging.info("Subscribed to monitoring messages")
+                break
 
         self.monitor_sub.setsockopt_string(zmq.UNSUBSCRIBE, "sync")
         sync.close()
@@ -69,9 +72,12 @@ class Messenger:
         sync = self.ctx.socket(zmq.REQ)
         sync.connect(SYNC)
 
-        self.operation_sub.recv_string()
-        sync.send_string("controls")
-        logging.info("Subscribed to operation messages")
+        while True:
+            msg = self.operation_sub.recv_string()
+            if msg == "sync-websockets":
+                sync.send_string("controls")
+                logging.info("Subscribed to operation messages")
+                break
 
         self.operation_sub.setsockopt_string(zmq.UNSUBSCRIBE, "sync")
         sync.close()
@@ -92,5 +98,5 @@ class Messenger:
         elif self.operation_sub in sockets:
             [topic, body] = self.operation_sub.recv_multipart()
         else:
-            return None
+            return [None, None]
         return [topic.decode(), json.loads(body)]

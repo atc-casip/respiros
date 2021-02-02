@@ -52,9 +52,32 @@ class Messenger:
         sync_controls = self.ctx.socket(zmq.REP)
         sync_controls.bind(SYNC_CONTROLS)
 
+        while True:
+            self.pub.send_string("sync-controls")
+            try:
+                sync_controls.recv(zmq.NOBLOCK)
+                logging.info("Control system process subscribed")
+                break
+            except zmq.Again:
+                continue
+
+        sync_controls.close()
+
         sync_websockets = self.ctx.socket(zmq.REP)
         sync_websockets.bind(SYNC_WEBSOCKETS)
 
+        while True:
+            self.pub.send_string("sync-websockets")
+            try:
+                sync_websockets.recv(zmq.NOBLOCK)
+                logging.info("WebSockets process subscribed")
+                break
+            except zmq.Again:
+                continue
+
+        sync_websockets.close()
+
+        """
         poller = zmq.Poller()
         poller.register(sync_controls, zmq.POLLIN)
         poller.register(sync_websockets, zmq.POLLIN)
@@ -78,6 +101,7 @@ class Messenger:
 
         sync_controls.close()
         sync_websockets.close()
+        """
 
     def __sync_sub(self):
         """Synchronize with monitoring publisher."""
@@ -86,9 +110,12 @@ class Messenger:
         sync = self.ctx.socket(zmq.REQ)
         sync.connect(SYNC_GUI)
 
-        self.sub.recv_string()
-        sync.send_string("gui")
-        logging.info("Subscribed to monitoring messages")
+        while True:
+            msg = self.sub.recv_string()
+            if msg == "sync-gui":
+                sync.send_string("gui")
+                logging.info("Subscribed to monitoring messages")
+                break
 
         self.sub.setsockopt_string(zmq.UNSUBSCRIBE, "sync")
         sync.close()
