@@ -4,79 +4,61 @@ Emit events to clients using WebSockets.
 
 import logging
 
+import gevent
 import socketio
 
-from .context import Context
 from .messenger import Messenger
 
-sio = socketio.Server(async_mode="eventlet")
+sio = socketio.Server(async_mode="gevent", cors_allowed_origins="*")
 app = socketio.WSGIApp(sio)
 
 
 @sio.event
-def connect(sid, data):
+def connect(sid, environ):
     """Handler for the connection event."""
 
     logging.info("New client connected with ID %s", sid)
 
 
-@sio.event()
-def disconnect(sid, data):
+@sio.event
+def disconnect(sid):
     """Handler for the disconnection event."""
 
     logging.info("Client with ID %s disconnected", sid)
 
 
-def emit_parameters(ctx: Context):
-    logging.info("emitting params")
-    sio.emit(
-        "parameters",
-        {
-            "mode": "VPS",
-            "ipap": ctx.ipap,
-            "epap": ctx.epap,
-            "breathing_freq": ctx.freq,
-            "trigger": ctx.trigger,
-            "ie_relation": f"{ctx.inhale}:{ctx.exhale}",
-        },
-    )
+def handle_messages(messenger: Messenger):
+    """Controller that produces Socket.IO events according to the internal ZeroMQ messages it
+    receives.
 
+    Args:
+        messenger (Messenger): ZeroMQ messenger.
+    """
 
-def emit_cycle(ctx: Context):
-    pass
-
-
-def emit_readings(ctx: Context):
-    logging.info("emitting readings")
-    sio.emit("readings", ctx.readings)
-    ctx.readings = []
-
-
-def emit_alarm(ctx: Context):
-    pass
-
-
-def handle_messages(messenger: Messenger, ctx: Context):
     while True:
-        [topic, msg] = messenger.recv()
+        [topic, msg] = messenger.recv(block=False)
         if topic == "operation":
-            ctx.ipap = msg["ipap"]
-            ctx.epap = msg["epap"]
-            ctx.freq = msg["freq"]
-            ctx.trigger = msg["trigger"]
-            ctx.inhale = msg["inhale"]
-            ctx.exhale = msg["exhale"]
-
-            emit_parameters(ctx)
+            logging.info("emitting params")
+            sio.emit(
+                "parameters",
+                {
+                    "mode": "VPS",
+                    "ipap": msg["ipap"],
+                    "epap": msg["epap"],
+                    "breathing_freq": msg["freq"],
+                    "trigger": msg["trigger"],
+                    "ie_relation": f"{msg['inhale']}:{msg['exhale']}",
+                },
+            )
         elif topic == "reading":
-            ctx.readings.append(
+            sio.emit(
+                "readings",
                 {
                     "pressure": msg["pressure"],
                     "flow": msg["airflow"],
                     "volume": msg["volume"],
                     "timestamp": msg["timestamp"],
-                }
+                },
             )
 
-            if len(ctx.readings) == 10:
-                emit_readings(ctx)
+        gevent.sleep(0.01)
