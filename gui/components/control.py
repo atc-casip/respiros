@@ -2,7 +2,7 @@
 System control pane during operation.
 """
 
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 
 import PySimpleGUI as sg
 from gui.config import cfg
@@ -29,25 +29,37 @@ class ParametersTab(sg.Tab):
         self.ipap = NumericSlider(
             "Presión IPAP",
             metric="cmH\N{SUBSCRIPT TWO}O",
-            values=(cfg["params"]["ipap"]["min"], cfg["params"]["ipap"]["max"]),
+            values=(
+                cfg["params"]["ipap"]["min"],
+                cfg["params"]["ipap"]["max"],
+            ),
             default_value=cfg["params"]["ipap"]["default"],
         )
         self.epap = NumericSlider(
             "Presión EPAP",
             metric="cmH\N{SUBSCRIPT TWO}O",
-            values=(cfg["params"]["epap"]["min"], cfg["params"]["epap"]["max"]),
+            values=(
+                cfg["params"]["epap"]["min"],
+                cfg["params"]["epap"]["max"],
+            ),
             default_value=cfg["params"]["epap"]["default"],
         )
         self.freq = NumericSlider(
             "Frecuencia",
             metric="rpm",
-            values=(cfg["params"]["freq"]["min"], cfg["params"]["freq"]["max"]),
+            values=(
+                cfg["params"]["freq"]["min"],
+                cfg["params"]["freq"]["max"],
+            ),
             default_value=cfg["params"]["freq"]["default"],
         )
         self.trigger = NumericSlider(
             "Trigger de flujo",
             metric="ml",
-            values=(cfg["params"]["trigger"]["min"], cfg["params"]["trigger"]["max"]),
+            values=(
+                cfg["params"]["trigger"]["min"],
+                cfg["params"]["trigger"]["max"],
+            ),
             default_value=cfg["params"]["trigger"]["default"],
         )
         self.ie = IESlider(
@@ -79,7 +91,13 @@ class ParametersTab(sg.Tab):
         self.ie.expand()
 
     def update_values(
-        self, ipap: int, epap: int, freq: int, trigger: int, inhale: int, exhale: int
+        self,
+        ipap: int,
+        epap: int,
+        freq: int,
+        trigger: int,
+        inhale: int,
+        exhale: int,
     ):
         """Update the tab's sliders with new values.
 
@@ -98,7 +116,9 @@ class ParametersTab(sg.Tab):
         self.trigger.value = trigger
         self.ie.value = (inhale, exhale)
 
-    def handle_event(self, event: str, values: Dict, ctx: Context, msg: Messenger):
+    def handle_event(
+        self, event: str, values: Dict, ctx: Context, msg: Messenger
+    ):
         """React to the event provided by the event loop.
 
         Args:
@@ -170,43 +190,64 @@ class AlarmsTab(sg.Tab):
         self.pressure_min = NumericSlider(
             "Min",
             metric="cmH\N{SUBSCRIPT TWO}O",
-            values=(cfg["alarms"]["pressure"]["min"], cfg["alarms"]["pressure"]["max"]),
+            values=(
+                cfg["alarms"]["pressure"]["min"],
+                cfg["alarms"]["pressure"]["max"],
+            ),
             default_value=cfg["alarms"]["pressure"]["min"],
         )
         self.pressure_max = NumericSlider(
             "Max",
             metric="cmH\N{SUBSCRIPT TWO}O",
-            values=(cfg["alarms"]["pressure"]["min"], cfg["alarms"]["pressure"]["max"]),
+            values=(
+                cfg["alarms"]["pressure"]["min"],
+                cfg["alarms"]["pressure"]["max"],
+            ),
             default_value=cfg["alarms"]["pressure"]["max"],
         )
         self.volume_min = NumericSlider(
             "Min",
             metric="l/min",
-            values=(cfg["alarms"]["volume"]["min"], cfg["alarms"]["volume"]["max"]),
+            values=(
+                cfg["alarms"]["volume"]["min"],
+                cfg["alarms"]["volume"]["max"],
+            ),
             default_value=cfg["alarms"]["volume"]["min"],
         )
         self.volume_max = NumericSlider(
             "Max",
             metric="l/min",
-            values=(cfg["alarms"]["volume"]["min"], cfg["alarms"]["volume"]["max"]),
+            values=(
+                cfg["alarms"]["volume"]["min"],
+                cfg["alarms"]["volume"]["max"],
+            ),
             default_value=cfg["alarms"]["volume"]["max"],
         )
         self.oxygen_min = NumericSlider(
             "Min",
             metric="%",
-            values=(cfg["alarms"]["oxygen"]["min"], cfg["alarms"]["oxygen"]["max"]),
+            values=(
+                cfg["alarms"]["oxygen"]["min"],
+                cfg["alarms"]["oxygen"]["max"],
+            ),
             default_value=cfg["alarms"]["oxygen"]["min"],
         )
         self.oxygen_max = NumericSlider(
             "Max",
             metric="%",
-            values=(cfg["alarms"]["oxygen"]["min"], cfg["alarms"]["oxygen"]["max"]),
+            values=(
+                cfg["alarms"]["oxygen"]["min"],
+                cfg["alarms"]["oxygen"]["max"],
+            ),
             default_value=cfg["alarms"]["oxygen"]["max"],
         )
         self.freq_max = NumericSlider(
             "Max",
             metric="rpm",
-            values=(cfg["alarms"]["freq"]["min"], cfg["alarms"]["freq"]["max"]),
+            values=(
+                cfg["alarms"]["freq"]["min"],
+                cfg["alarms"]["freq"]["max"],
+            ),
             default_value=cfg["alarms"]["freq"]["max"],
         )
 
@@ -216,10 +257,14 @@ class AlarmsTab(sg.Tab):
             font=("Helvetica", 15),
         )
         self.volume_frame = sg.Frame(
-            "Volumen", [[self.volume_min, self.volume_max]], font=("Helvetica", 15)
+            "Volumen",
+            [[self.volume_min, self.volume_max]],
+            font=("Helvetica", 15),
         )
         self.oxygen_frame = sg.Frame(
-            "Oxígeno", [[self.oxygen_min, self.oxygen_max]], font=("Helvetica", 15)
+            "Oxígeno",
+            [[self.oxygen_min, self.oxygen_max]],
+            font=("Helvetica", 15),
         )
         self.freq_frame = sg.Frame(
             "Frecuencia", [[self.freq_max]], font=("Helvetica", 15)
@@ -256,7 +301,9 @@ class AlarmsTab(sg.Tab):
 
         self.commit_btn.expand(expand_x=True)
 
-    def handle_event(self, event: str, values: Dict, ctx: Context, msg: Messenger):
+    def handle_event(
+        self, event: str, values: Dict, ctx: Context, msg: Messenger
+    ):
         """React to the event provided by the event loop.
 
         Args:
@@ -377,7 +424,10 @@ class ControlPane(sg.Column):
         self.__current_tab = self.parameters
 
         super().__init__(
-            [[self.tabs], [self.parameters_btn, self.alarms_btn, self.history_btn]]
+            [
+                [self.tabs],
+                [self.parameters_btn, self.alarms_btn, self.history_btn],
+            ]
         )
 
     def expand(self):
@@ -415,11 +465,17 @@ class ControlPane(sg.Column):
             self.__current_tab.update(visible=False)
             self.__current_tab = self.parameters
             self.__current_tab.select()
-        elif event == self.alarms_btn.Key and self.__current_tab is not self.alarms:
+        elif (
+            event == self.alarms_btn.Key
+            and self.__current_tab is not self.alarms
+        ):
             self.__current_tab.update(visible=False)
             self.__current_tab = self.alarms
             self.__current_tab.select()
-        elif event == self.history_btn.Key and self.__current_tab is not self.history:
+        elif (
+            event == self.history_btn.Key
+            and self.__current_tab is not self.history
+        ):
             self.__current_tab.update(visible=False)
             self.__current_tab = self.history
             self.__current_tab.select()

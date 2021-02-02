@@ -114,12 +114,16 @@ class OperationControlled(State):
                 pass
 
             cycle_duration = 60 / self.freq  # ms
-            insp_duration = cycle_duration / (self.inhale + self.exhale) * self.inhale
-            exp_duration = cycle_duration / (self.exhale + self.inhale) * self.exhale
+            insp_duration = (
+                cycle_duration / (self.inhale + self.exhale) * self.inhale
+            )
+            exp_duration = (
+                cycle_duration / (self.exhale + self.inhale) * self.exhale
+            )
 
-            if (not insp_exp and time.time() >= time_saved + insp_duration) or (
-                insp_exp and time.time() >= time_saved + exp_duration
-            ):
+            if (
+                not insp_exp and time.time() >= time_saved + insp_duration
+            ) or (insp_exp and time.time() >= time_saved + exp_duration):
                 insp_exp = not insp_exp
                 time_saved = time.time()
 

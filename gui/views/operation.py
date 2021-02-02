@@ -13,7 +13,10 @@ from .view import View
 
 
 class OperationView(View):
-    """This view allows the user to monitor and control the operation of the system."""
+    """
+    This view allows the user to monitor and control the operation of the
+    system.
+    """
 
     topbar: MonitorBar
     canvas: PlotCanvas

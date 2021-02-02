@@ -39,24 +39,34 @@ class SelfCheck(State):
         # TODO: Call the actual functions instead of using static values
 
         dht_box_ok = True
-        logging.info("Box DHT sensor status: %s", "OK" if dht_box_ok else "FAIL")
+        logging.info(
+            "Box DHT sensor status: %s", "OK" if dht_box_ok else "FAIL"
+        )
 
         dht_air_ok = True
-        logging.info("Air DHT sensor status: %s", "OK" if dht_air_ok else "FAIL")
+        logging.info(
+            "Air DHT sensor status: %s", "OK" if dht_air_ok else "FAIL"
+        )
 
         gauge_ok, airflow_ok, servo_ok = (True, True, True)
-        logging.info("Gauge pressure sensor status: %s", "OK" if dht_air_ok else "FAIL")
         logging.info(
-            "Airflow pressure sensor status: %s", "OK" if dht_air_ok else "FAIL"
+            "Gauge pressure sensor status: %s", "OK" if dht_air_ok else "FAIL"
+        )
+        logging.info(
+            "Airflow pressure sensor status: %s",
+            "OK" if dht_air_ok else "FAIL",
         )
         logging.info("Servo status: %s", "OK" if dht_air_ok else "FAIL")
 
         oxygen_ok = True
-        logging.info("Oxygen sensor status: %s", "OK" if dht_air_ok else "FAIL")
+        logging.info(
+            "Oxygen sensor status: %s", "OK" if dht_air_ok else "FAIL"
+        )
 
         atm_ok = True
         logging.info(
-            "Atmospheric pressure sensor status: %s", "OK" if dht_air_ok else "FAIL"
+            "Atmospheric pressure sensor status: %s",
+            "OK" if dht_air_ok else "FAIL",
         )
 
         # We need to wait a bit so the GUI application can catch up
@@ -76,7 +86,15 @@ class SelfCheck(State):
         )
 
         if all(
-            [dht_box_ok, dht_air_ok, gauge_ok, airflow_ok, servo_ok, oxygen_ok, atm_ok]
+            [
+                dht_box_ok,
+                dht_air_ok,
+                gauge_ok,
+                airflow_ok,
+                servo_ok,
+                oxygen_ok,
+                atm_ok,
+            ]
         ):
             return ChecksSuccessful(None)
         return ChecksUnsuccessful(None)
@@ -90,7 +108,10 @@ class SelfCheck(State):
             self.ctx.dht_box.trigger()
             tmp = self.ctx.dht_box.temperature()
             hum = self.ctx.dht_box.humidity()
-            if BOX_TMP_MIN <= tmp <= BOX_TMP_MAX or BOX_HUM_MIN <= hum <= BOX_HUM_MAX:
+            if (
+                BOX_TMP_MIN <= tmp <= BOX_TMP_MAX
+                or BOX_HUM_MIN <= hum <= BOX_HUM_MAX
+            ):
                 return True
             time.sleep(2)
 
@@ -131,11 +152,16 @@ class SelfCheck(State):
                 gauge_pressure = self.ctx.gauge_pressure_sensor.read()
                 airflow_pressure = self.ctx.airflow_pressure_sensor.read()
 
-                if angle == 0 and GAUGE_MIN * 0.95 < gauge_pressure < GAUGE_MIN * 1.05:
+                if (
+                    angle == 0
+                    and GAUGE_MIN * 0.95 < gauge_pressure < GAUGE_MIN * 1.05
+                ):
                     flag_gauge_0_ok = True
                 if (
                     angle == 0
-                    and AIRFLOW_MAX * 0.9 < airflow_pressure < AIRFLOW_MIN * 1.05
+                    and AIRFLOW_MAX * 0.9
+                    < airflow_pressure
+                    < AIRFLOW_MIN * 1.05
                 ):
                     flag_flow_0_ok = True
 
@@ -146,7 +172,9 @@ class SelfCheck(State):
                     flag_gauge_180_ok = True
                 if (
                     angle == 180
-                    and AIRFLOW_MAX * 0.95 < airflow_pressure < AIRFLOW_MIN * 1.05
+                    and AIRFLOW_MAX * 0.95
+                    < airflow_pressure
+                    < AIRFLOW_MIN * 1.05
                 ):
                     flag_flow_180_ok = True
 

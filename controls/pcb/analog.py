@@ -1,6 +1,6 @@
 """
-This module contains utilites for working with analog devices, including a basic
-analog-to-digital converter.
+This module contains utilites for working with analog devices, including a
+basic analog-to-digital converter.
 """
 
 import atexit
@@ -14,7 +14,9 @@ class AnalogConverter:
     An MCP3008 analog to digital converter.
     """
 
-    def __init__(self, pi: pigpio.pi, channel: int, baud_rate: int, voltage: float):
+    def __init__(
+        self, pi: pigpio.pi, channel: int, baud_rate: int, voltage: float
+    ):
         """
         Instantiate a new ADC connected to the Pi.
 
@@ -57,12 +59,17 @@ class AnalogSensor:
     A sensor connected to an analog-to-digital converter.
     """
 
-    def __init__(self, adc: AnalogConverter, channel: int, func: Callable[[float], float]):
+    def __init__(
+        self,
+        adc: AnalogConverter,
+        channel: int,
+        func: Callable[[float], float],
+    ):
         """
         Create a new instance of an analog sensor.
 
-        The ADC it is connected to and the channel must be given, along with the function used to
-        convert the voltage to the actual reading.
+        The ADC it is connected to and the channel must be given, along with
+        the function used to convert the voltage to the actual reading.
         """
 
         self.adc = adc

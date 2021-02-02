@@ -32,25 +32,37 @@ class ParametersView(View):
         self.ipap = NumericSlider(
             "Presión IPAP",
             metric="cmH\N{SUBSCRIPT TWO}O",
-            values=(cfg["params"]["ipap"]["min"], cfg["params"]["ipap"]["max"]),
+            values=(
+                cfg["params"]["ipap"]["min"],
+                cfg["params"]["ipap"]["max"],
+            ),
             default_value=cfg["params"]["ipap"]["default"],
         )
         self.epap = NumericSlider(
             "Presión EPAP",
             metric="cmH\N{SUBSCRIPT TWO}O",
-            values=(cfg["params"]["epap"]["min"], cfg["params"]["epap"]["max"]),
+            values=(
+                cfg["params"]["epap"]["min"],
+                cfg["params"]["epap"]["max"],
+            ),
             default_value=cfg["params"]["epap"]["default"],
         )
         self.freq = NumericSlider(
             "Frecuencia",
             metric="rpm",
-            values=(cfg["params"]["freq"]["min"], cfg["params"]["freq"]["max"]),
+            values=(
+                cfg["params"]["freq"]["min"],
+                cfg["params"]["freq"]["max"],
+            ),
             default_value=cfg["params"]["freq"]["default"],
         )
         self.trigger = NumericSlider(
             "Trigger de flujo",
             metric="ml",
-            values=(cfg["params"]["trigger"]["min"], cfg["params"]["trigger"]["max"]),
+            values=(
+                cfg["params"]["trigger"]["min"],
+                cfg["params"]["trigger"]["max"],
+            ),
             default_value=cfg["params"]["trigger"]["default"],
         )
         self.ie = IESlider(

@@ -109,7 +109,9 @@ class IESlider(ParameterSlider):
     ):
         self.__value = self.__tuple_to_int(default_value)
 
-        self.title_label = sg.Text("Relación I:E", font=(FONT_FAMILY, FONT_SIZE))
+        self.title_label = sg.Text(
+            "Relación I:E", font=(FONT_FAMILY, FONT_SIZE)
+        )
         self.value_label = sg.Text(
             f"{default_value[0]}:{default_value[1]}",
             size=(5, 1),

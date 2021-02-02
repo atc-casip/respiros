@@ -86,10 +86,12 @@ class Messenger:
         """Receive a message from the other processes.
 
         Args:
-            block (bool, optional): Whether or not this call should block. Defaults to True.
+            block (bool, optional): Whether or not this call should block.
+                Defaults to True.
 
         Returns:
-            Tuple[str, Dict]: The received message's topic and JSON-formatted content.
+            Tuple[str, Dict]: The received message's topic and JSON-formatted
+                content.
         """
 
         sockets = dict(self.poller.poll(timeout=0 if not block else None))

@@ -60,7 +60,7 @@ class DHTSensor:
             self.cb.cancel()
             self.cb = None
 
-        logging.info('Destroyed DHT sensor')
+        logging.info("Destroyed DHT sensor")
 
     def __cb(self, gpio_pin, level, tick):
         """
@@ -126,7 +126,7 @@ class DHTSensor:
             elif self.bit >= 0:  # in humidity high byte
                 self.hH = (self.hH << 1) + val
 
-            else:               # header bits
+            else:  # header bits
                 pass
 
             self.bit += 1
@@ -139,17 +139,17 @@ class DHTSensor:
 
         else:  # level == pigpio.TIMEOUT:
             self.pi.set_watchdog(self.gpio_pin, 0)
-            if self.bit < 8:       # Too few data bits received.
-                self.bad_MM += 1    # Bump missing message count.
+            if self.bit < 8:  # Too few data bits received.
+                self.bad_MM += 1  # Bump missing message count.
                 self.no_response += 1
                 if self.no_response > self.MAX_NO_RESPONSE:
                     self.no_response = 0
                     self.bad_SR += 1  # Bump sensor reset count.
-            elif self.bit < 39:    # Short message receieved.
-                self.bad_SM += 1    # Bump short message count.
+            elif self.bit < 39:  # Short message receieved.
+                self.bad_SM += 1  # Bump short message count.
                 self.no_response = 0
 
-            else:                  # Full message received.
+            else:  # Full message received.
                 self.no_response = 0
 
     def temperature(self):

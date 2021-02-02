@@ -82,31 +82,6 @@ class Messenger:
 
         sync_websockets.close()
 
-        """
-        poller = zmq.Poller()
-        poller.register(sync_gui, zmq.POLLIN)
-        poller.register(sync_websockets, zmq.POLLIN)
-
-        subscribers = []
-        while len(subscribers) < 2:
-            self.pub.send_string("sync")
-
-            try:
-                sockets = dict(poller.poll(timeout=0))
-            except KeyboardInterrupt:
-                break
-
-            if sync_gui in sockets and sync_gui not in subscribers:
-                subscribers.append(sync_gui)
-                logging.info("GUI process subscribed")
-
-            if sync_websockets in sockets and sync_websockets not in subscribers:
-                subscribers.append(sync_websockets)
-                logging.info("WebSockets process subscribed")
-
-        sync_websockets.close()
-        """
-
     def __sync_sub(self):
         """
         Synchronize with operation publisher.
@@ -140,5 +115,7 @@ class Messenger:
         Returns both the topic and the contents in a tuple.
         """
 
-        [topic, body] = self.sub.recv_multipart(zmq.NOBLOCK if not block else 0)
+        [topic, body] = self.sub.recv_multipart(
+            zmq.NOBLOCK if not block else 0
+        )
         return [topic.decode(), json.loads(body)]

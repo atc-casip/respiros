@@ -71,7 +71,7 @@ class PlotCanvas(sg.Canvas):
             self.ax_airflow.grid()
             self.ax_airflow.tick_params(
                 axis="x",  # changes apply to the x-axis
-                which="both",  # both major and minor ticks are affectedOperation.canvas.
+                which="both",  # both major and minor ticks are affected
                 bottom=False,  # ticks along the bottom edge are off
                 top=False,  # ticks along the top edge are off
                 labelbottom=False,
@@ -106,7 +106,9 @@ class PlotCanvas(sg.Canvas):
             (self.ln_airflow,) = self.ax_airflow.plot(
                 0, animated=True, color="greenyellow"
             )
-            (self.ln_volume,) = self.ax_volume.plot(0, animated=True, color="cyan")
+            (self.ln_volume,) = self.ax_volume.plot(
+                0, animated=True, color="cyan"
+            )
 
     def update_plots(
         self,

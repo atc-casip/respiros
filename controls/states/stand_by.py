@@ -1,5 +1,6 @@
 """
-Before starting operation, the system waits for the user to define the necessary parameters.
+Before starting operation, the system waits for the user to define the
+necessary parameters.
 """
 
 import logging

@@ -31,9 +31,15 @@ class MonitorBar(sg.Column):
         self.ipap = sg.Text("-", font=(FONT_FAMILY, FONT_SIZE_BIG, FONT_STYLE))
         self.epap = sg.Text("-", font=(FONT_FAMILY, FONT_SIZE_BIG, FONT_STYLE))
         self.freq = sg.Text("-", font=(FONT_FAMILY, FONT_SIZE_BIG, FONT_STYLE))
-        self.vc_in = sg.Text("-", font=(FONT_FAMILY, FONT_SIZE_SMALL, FONT_STYLE))
-        self.vc_out = sg.Text("-", font=(FONT_FAMILY, FONT_SIZE_SMALL, FONT_STYLE))
-        self.oxygen = sg.Text("-", font=(FONT_FAMILY, FONT_SIZE_SMALL, FONT_STYLE))
+        self.vc_in = sg.Text(
+            "-", font=(FONT_FAMILY, FONT_SIZE_SMALL, FONT_STYLE)
+        )
+        self.vc_out = sg.Text(
+            "-", font=(FONT_FAMILY, FONT_SIZE_SMALL, FONT_STYLE)
+        )
+        self.oxygen = sg.Text(
+            "-", font=(FONT_FAMILY, FONT_SIZE_SMALL, FONT_STYLE)
+        )
 
         self.lock_btn = sg.RealtimeButton("Bloquear", size=(9, 2))
 
@@ -42,7 +48,9 @@ class MonitorBar(sg.Column):
         super().__init__(
             [
                 [
-                    sg.Text("IPAP:", font=(FONT_FAMILY, FONT_SIZE_BIG, FONT_STYLE)),
+                    sg.Text(
+                        "IPAP:", font=(FONT_FAMILY, FONT_SIZE_BIG, FONT_STYLE)
+                    ),
                     self.ipap,
                     sg.Text(
                         "cmH\N{SUBSCRIPT TWO}O",
@@ -50,7 +58,9 @@ class MonitorBar(sg.Column):
                     ),
                 ]
                 + [
-                    sg.Text("EPAP:", font=(FONT_FAMILY, FONT_SIZE_BIG, FONT_STYLE)),
+                    sg.Text(
+                        "EPAP:", font=(FONT_FAMILY, FONT_SIZE_BIG, FONT_STYLE)
+                    ),
                     self.epap,
                     sg.Text(
                         "cmH\N{SUBSCRIPT TWO}O",
@@ -59,23 +69,34 @@ class MonitorBar(sg.Column):
                 ]
                 + [
                     sg.Text(
-                        "Frecuencia:", font=(FONT_FAMILY, FONT_SIZE_BIG, FONT_STYLE)
+                        "Frecuencia:",
+                        font=(FONT_FAMILY, FONT_SIZE_BIG, FONT_STYLE),
                     ),
                     self.freq,
-                    sg.Text("rpm", font=(FONT_FAMILY, FONT_SIZE_BIG, FONT_STYLE)),
+                    sg.Text(
+                        "rpm", font=(FONT_FAMILY, FONT_SIZE_BIG, FONT_STYLE)
+                    ),
                 ]
                 + [sg.Text("", size=(2, 0))]
                 + [
-                    sg.Text("V (in):", font=(FONT_FAMILY, FONT_SIZE_SMALL, FONT_STYLE)),
+                    sg.Text(
+                        "V (in):",
+                        font=(FONT_FAMILY, FONT_SIZE_SMALL, FONT_STYLE),
+                    ),
                     self.vc_in,
-                    sg.Text("ml", font=(FONT_FAMILY, FONT_SIZE_SMALL, FONT_STYLE)),
+                    sg.Text(
+                        "ml", font=(FONT_FAMILY, FONT_SIZE_SMALL, FONT_STYLE)
+                    ),
                 ]
                 + [
                     sg.Text(
-                        "V (out):", font=(FONT_FAMILY, FONT_SIZE_SMALL, FONT_STYLE)
+                        "V (out):",
+                        font=(FONT_FAMILY, FONT_SIZE_SMALL, FONT_STYLE),
                     ),
                     self.vc_out,
-                    sg.Text("ml", font=(FONT_FAMILY, FONT_SIZE_SMALL, FONT_STYLE)),
+                    sg.Text(
+                        "ml", font=(FONT_FAMILY, FONT_SIZE_SMALL, FONT_STYLE)
+                    ),
                 ]
                 + [
                     sg.Text(
@@ -83,7 +104,9 @@ class MonitorBar(sg.Column):
                         font=(FONT_FAMILY, FONT_SIZE_SMALL, FONT_STYLE),
                     ),
                     self.oxygen,
-                    sg.Text("%", font=(FONT_FAMILY, FONT_SIZE_SMALL, FONT_STYLE)),
+                    sg.Text(
+                        "%", font=(FONT_FAMILY, FONT_SIZE_SMALL, FONT_STYLE)
+                    ),
                 ]
                 + [self.expander]
                 + [self.lock_btn]

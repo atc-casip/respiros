@@ -13,7 +13,9 @@ class Servo:
     A continuous servo that moves between 0 and 180 degrees.
     """
 
-    def __init__(self, pi: pigpio.pi, gpio_pin: int, min_width: int, max_width: int):
+    def __init__(
+        self, pi: pigpio.pi, gpio_pin: int, min_width: int, max_width: int
+    ):
         """
         Instantiate a new servo connected to the Pi on the given GPIO pin.
 
@@ -34,7 +36,7 @@ class Servo:
 
         self.pi.set_servo_pulsewidth(self.gpio_pin, self.min_width)
 
-        logging.info('Destroyed servo')
+        logging.info("Destroyed servo")
 
     def set_angle(self, angle: int):
         """
@@ -42,9 +44,10 @@ class Servo:
         """
 
         if angle < 0 or angle > 180:
-            raise ValueError('The angle must be between 0 and 180 degrees.')
+            raise ValueError("The angle must be between 0 and 180 degrees.")
 
-        width = (angle/180) * (self.max_width -
-                               self.min_width) + self.min_width
+        width = (angle / 180) * (
+            self.max_width - self.min_width
+        ) + self.min_width
         self.pi.set_servo_pulsewidth(self.gpio_pin, width)
-        logging.info('Moved servo to %d degrees', angle)
+        logging.info("Moved servo to %d degrees", angle)

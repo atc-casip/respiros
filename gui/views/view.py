@@ -22,8 +22,8 @@ class View(sg.Column, ABC):
     def set_up(self, ctx: Context):
         """Prepare the view before actually using it.
 
-        Usually, this involves expanding elements or updating the initial values with the ones
-        provided by the context.
+        Usually, this involves expanding elements or updating the initial
+        values with the ones provided by the context.
 
         Args:
             ctx (Context): Application context.

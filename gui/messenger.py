@@ -77,32 +77,6 @@ class Messenger:
 
         sync_websockets.close()
 
-        """
-        poller = zmq.Poller()
-        poller.register(sync_controls, zmq.POLLIN)
-        poller.register(sync_websockets, zmq.POLLIN)
-
-        subscribers = []
-        while len(subscribers) < 2:
-            self.pub.send_string("sync")
-
-            try:
-                sockets = dict(poller.poll(timeout=0))
-            except KeyboardInterrupt:
-                break
-
-            if sync_controls in sockets and sync_controls not in subscribers:
-                subscribers.append(sync_controls)
-                logging.info("Control system process subscribed")
-
-            if sync_websockets in sockets and sync_websockets not in subscribers:
-                subscribers.append(sync_websockets)
-                logging.info("WebSockets process subscribed")
-
-        sync_controls.close()
-        sync_websockets.close()
-        """
-
     def __sync_sub(self):
         """Synchronize with monitoring publisher."""
 
@@ -134,11 +108,15 @@ class Messenger:
         """Receive a message from the other processes.
 
         Args:
-            block (bool, optional): Whether or not this call should block. Defaults to True.
+            block (bool, optional): Whether or not this call should block.
+                Defaults to True.
 
         Returns:
-            Tuple[str, Dict]: The received message's topic and JSON-formatted content.
+            Tuple[str, Dict]: The received message's topic and JSON-formatted
+                content.
         """
 
-        [topic, body] = self.sub.recv_multipart(zmq.NOBLOCK if not block else 0)
+        [topic, body] = self.sub.recv_multipart(
+            zmq.NOBLOCK if not block else 0
+        )
         return [topic.decode(), json.loads(body)]
