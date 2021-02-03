@@ -1,17 +1,1 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-  <channel>
-    <title>Respir-OS – Documentación</title>
-    <link>https://atc-casip.github.io/respiros/es/docs/</link>
-    <description>Recent content in Documentación on Respir-OS</description>
-    <generator>Hugo -- gohugo.io</generator>
-    
-	  <atom:link href="https://atc-casip.github.io/respiros/es/docs/index.xml" rel="self" type="application/rss+xml" />
-    
-    
-      
-        
-      
-    
-    
-  </channel>
-</rss>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Respir-OS – Documentación</title><link>https://atc-casip.github.io/respiros/es/docs/</link><description>Recent content in Documentación on Respir-OS</description><generator>Hugo -- gohugo.io</generator><atom:link href="https://atc-casip.github.io/respiros/es/docs/index.xml" rel="self" type="application/rss+xml"/></channel></rss>
