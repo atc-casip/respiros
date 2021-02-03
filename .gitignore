@@ -10,5 +10,4 @@ hugo.darwin
 hugo.linux
 
 ### NodeJS ###
-package-lock.json
 node_modules

@@ -1,0 +1,24 @@
+{
+  "name": "respiros-site",
+  "version": "1.0.0",
+  "description": "Website of the RespirOS project.",
+  "main": "none.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/atc-casip/respiros.git"
+  },
+  "author": "Víctor Vázquez",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/atc-casip/respiros/issues"
+  },
+  "homepage": "https://github.com/atc-casip/respiros#readme",
+  "devDependencies": {
+    "autoprefixer": "^10.2.4",
+    "postcss": "^8.2.4",
+    "postcss-cli": "^8.3.1"
+  }
+}
