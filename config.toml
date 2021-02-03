@@ -1,0 +1,44 @@
+baseURL = "https://atc-casip.github.io/respiros/"
+theme = ["docsy"]
+
+# Default language.
+defaultContentLanguage = "en"
+defaultContentLanguageInSubdir = false
+
+# Markdown renderer.
+[markup]
+[markup.goldmark]
+[markup.goldmark.renderer]
+    unsafe = true
+[markup.highlight]
+    # See a complete list of available styles at https://xyproto.github.io/splash/docs/all.html
+    style = "tango"
+    # Uncomment if you want your chosen highlight style used for code blocks without a specified language
+    guessSyntax = "true"
+
+# Image processing configuration.
+[imaging]
+    resampleFilter = "CatmullRom"
+    quality = 75
+    anchor = "smart"
+
+# Language configuration.
+[languages]
+[languages.en]
+    title = "Respir-OS"
+    description = "The open and affordable respirator"
+    languageName = "English"
+    contentDir = "content/en"
+[languages.es]
+    title = "Respir-OS"
+    description = "El respirador abierto y asequible"
+    languageName = "Español"
+    contentDir = "content/es"
+
+# End user relevant links, shown on the footer.
+[params.links]
+[[params.links.developer]]
+    name = "GitHub"
+    url = "https://github.com/atc-casip/respiros"
+    icon = "fab fa-github"
+    desc = "The project's repository"
