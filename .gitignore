@@ -1,18 +1,3 @@
-### Hugo ###
-# Generated files by hugo
-site/public/
-site/resources/_gen/
-hugo_stats.json
-
-# Executable may be added to repository
-site/hugo.exe
-site/hugo.darwin
-site/hugo.linux
-
-### NodeJS ###
-site/package-lock.json
-site/node_modules
-
 ### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
