@@ -28,17 +28,23 @@ class MonitorBar(sg.Column):
     expander: sg.Text
 
     def __init__(self):
-        self.ipap = sg.Text("-", font=(FONT_FAMILY, FONT_SIZE_BIG, FONT_STYLE))
-        self.epap = sg.Text("-", font=(FONT_FAMILY, FONT_SIZE_BIG, FONT_STYLE))
-        self.freq = sg.Text("-", font=(FONT_FAMILY, FONT_SIZE_BIG, FONT_STYLE))
+        self.ipap = sg.Text(
+            "-", font=(FONT_FAMILY, FONT_SIZE_BIG, FONT_STYLE), size=(4, 1)
+        )
+        self.epap = sg.Text(
+            "-", font=(FONT_FAMILY, FONT_SIZE_BIG, FONT_STYLE), size=(4, 1)
+        )
+        self.freq = sg.Text(
+            "-", font=(FONT_FAMILY, FONT_SIZE_BIG, FONT_STYLE), size=(4, 1)
+        )
         self.vc_in = sg.Text(
-            "-", font=(FONT_FAMILY, FONT_SIZE_SMALL, FONT_STYLE)
+            "-", font=(FONT_FAMILY, FONT_SIZE_SMALL, FONT_STYLE), size=(3, 1)
         )
         self.vc_out = sg.Text(
-            "-", font=(FONT_FAMILY, FONT_SIZE_SMALL, FONT_STYLE)
+            "-", font=(FONT_FAMILY, FONT_SIZE_SMALL, FONT_STYLE), size=(3, 1)
         )
         self.oxygen = sg.Text(
-            "-", font=(FONT_FAMILY, FONT_SIZE_SMALL, FONT_STYLE)
+            "-", font=(FONT_FAMILY, FONT_SIZE_SMALL, FONT_STYLE), size=(3, 1)
         )
 
         self.lock_btn = sg.RealtimeButton("Bloquear", size=(9, 2))

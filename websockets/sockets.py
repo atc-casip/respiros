@@ -27,38 +27,46 @@ def disconnect(sid):
     logging.info("Client with ID %s disconnected", sid)
 
 
-def handle_messages(messenger: Messenger):
-    """Controller that produces Socket.IO events according to the internal ZeroMQ messages it
-    receives.
+def handle_messages(msg: Messenger):
+    """Main events' controller.
+
+    This function listens for events on the internal ZeroMQ sockets and emits
+    the corresponding events through WebSockets.
 
     Args:
         messenger (Messenger): ZeroMQ messenger.
     """
 
     while True:
-        [topic, msg] = messenger.recv(block=False)
+        [topic, body] = msg.recv(block=False)
         if topic == "operation":
             logging.info("emitting params")
             sio.emit(
                 "parameters",
                 {
                     "mode": "VPS",
-                    "ipap": msg["ipap"],
-                    "epap": msg["epap"],
-                    "breathing_freq": msg["freq"],
-                    "trigger": msg["trigger"],
-                    "ie_relation": f"{msg['inhale']}:{msg['exhale']}",
+                    "ipap": body["ipap"],
+                    "epap": body["epap"],
+                    "breathing_freq": body["freq"],
+                    "trigger": body["trigger"],
+                    "ie_relation": f"{body['inhale']}:{body['exhale']}",
                 },
             )
         elif topic == "reading":
             sio.emit(
                 "readings",
                 {
-                    "pressure": msg["pressure"],
-                    "flow": msg["airflow"],
-                    "volume": msg["volume"],
-                    "timestamp": msg["timestamp"],
+                    "pressure": body["pressure"],
+                    "flow": body["airflow"],
+                    "volume": body["volume"],
+                    "timestamp": body["timestamp"],
                 },
             )
+        elif topic == "cycle":
+            # TODO: Send cycle event.
+            pass
+        elif topic == "alarm":
+            # TODO: Send alarm event.
+            pass
 
         gevent.sleep(0.01)

@@ -32,7 +32,9 @@ OXYGEN_CHANNEL = 2
 
 if __name__ == "__main__":
     # TODO: Use different configurations for dev and prod environments
-    logging.basicConfig(filename="controls.log", filemode="w", level=logging.INFO)
+    logging.basicConfig(
+        filename="controls.log", filemode="w", level=logging.INFO
+    )
 
     """
     # Create Pi instance
@@ -50,9 +52,9 @@ if __name__ == "__main__":
     atm_ps = pcb.AnalogSensor(
         adc, ATMOSPHERIC_CHANNEL, lambda v: (v-0.21)/(4.6/100)+15)
     airflow_ps = pcb.AnalogSensor(
-        adc, AIRFLOW_CHANNEL, lambda v: v**2+(v-0.2025)/0.009)
+        adc, AIRFLOW_CHANNEL, lambda v: (-19.269 * v**2 + 172.15*v - 276.2))
     gauge_ps = pcb.AnalogSensor(
-        adc, GAUGE_CHANNEL, lambda v: (v-0.2025)/0.009)
+        adc, GAUGE_CHANNEL, lambda v: (10.971*v - 5.9539))
     oxygen_sensor = pcb.AnalogSensor(
         adc, OXYGEN_CHANNEL, lambda v: (74-21)/(0.0425-0.01)*v)
     """
@@ -70,7 +72,14 @@ if __name__ == "__main__":
 
     # Create system context
     ctx = Context(
-        msg, servo, dht_box, dht_air, atm_ps, airflow_ps, gauge_ps, oxygen_sensor
+        msg,
+        servo,
+        dht_box,
+        dht_air,
+        atm_ps,
+        airflow_ps,
+        gauge_ps,
+        oxygen_sensor,
     )
 
     current_state = states.SelfCheck(ctx)
