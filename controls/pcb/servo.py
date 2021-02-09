@@ -50,4 +50,3 @@ class Servo:
             self.max_width - self.min_width
         ) + self.min_width
         self.pi.set_servo_pulsewidth(self.gpio_pin, width)
-        logging.info("Moved servo to %d degrees", angle)

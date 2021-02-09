@@ -2,24 +2,26 @@
 Main operation modes.
 """
 
+from controls.messenger import Messenger
 import logging
 import time
 from typing import Dict
 
 import numpy as np
 import zmq
+from controls.config import cfg
 from controls.context import Context
 
 from .events import Event, StartOperationAssisted, StartOperationControlled
 from .state import State
 
-GAUGE_PRESSION_DIFF = 0.01  # s
+GAUGE_PRESSION_DIFF = 0.001  # s
 OXYGEN_PRESSION_DIFF = 1  # s
 DHT_DIFF = 10  # s
-MEAN_FREQ_LENGTH = 3
-MEAN_IEPAP_LENGTH = 1
+MEAN_FREQ_LENGTH = 6
+MEAN_IEPAP_LENGTH = 3
 MEAN_GAUGE_LENGTH = 3
-MEAN_AIRFLOW_LENGTH = 6
+MEAN_AIRFLOW_LENGTH = 10
 
 
 class OperationControlled(State):
@@ -39,6 +41,7 @@ class OperationControlled(State):
         self.from_standby = payload["from_standby"]
 
         self.ipap_old = 0.0
+        self.epap_old = 0.0
 
         self.ipap_read = 0.0
         self.epap_read = 0.0
@@ -69,6 +72,21 @@ class OperationControlled(State):
         self.temperature_air = None
 
         self.ipap_angle = 0.0
+        self.epap_angle = 0.0
+
+        self.iepap_table = [0 for _ in range(35)]
+        self.iepap_index = [0 for _ in range(35)]
+
+        # Alarms
+        self.pressure_min = cfg["alarms"]["pressure"]["min"]
+        self.pressure_max = cfg["alarms"]["pressure"]["max"]
+        self.volume_min = cfg["alarms"]["volume"]["min"]
+        self.volume_max = cfg["alarms"]["volume"]["max"]
+        self.oxygen_min = cfg["alarms"]["oxygen"]["min"]
+        self.oxygen_max = cfg["alarms"]["oxygen"]["max"]
+        self.freq_max = cfg["alarms"]["freq"]["max"]
+
+        self.active = []
 
     def transitions(self) -> Dict[Event, State]:
         return {StartOperationAssisted: OperationAssisted}
@@ -106,8 +124,14 @@ class OperationControlled(State):
                     self.exhale = msg["exhale"]
                 if topic == "change-alarms":
                     logging.info("Received new alarm ranges")
-                    # TODO: Change alarm ranges
-                    pass
+
+                    self.pressure_min = msg["pressure_min"]
+                    self.pressure_max = msg["pressure_max"]
+                    self.volume_min = msg["volume_min"]
+                    self.volume_max = msg["volume_max"]
+                    self.oxygen_min = msg["oxygen_min"]
+                    self.oxygen_max = msg["oxygen_max"]
+                    self.freq_max = msg["freq_max"]
             except zmq.Again:
                 # No message available at the moment of checking
                 pass
@@ -127,11 +151,12 @@ class OperationControlled(State):
                 if insp_exp:
                     self.insp_duration = time.time() - time_saved
                     self.ipap_read = self.gauge_pressure
+                    self.__calculate_angle_epap()
                 else:
                     self.esp_duration = time.time() - time_saved
                     self.epap_read = self.gauge_pressure
                     self.volume = 0
-                    self.__calculate_angle()
+                    self.__calculate_angle_ipap()
 
                 time_saved = time.time()
 
@@ -160,7 +185,7 @@ class OperationControlled(State):
                 ) * self.epap_read + (
                     1 / MEAN_IEPAP_LENGTH
                 ) * self.gauge_pressure
-                self.ctx.servo.set_angle(0)
+                self.ctx.servo.set_angle(self.epap_angle)
             else:  # Inhaling
                 self.ipap_read = (
                     (MEAN_IEPAP_LENGTH - 1) / MEAN_IEPAP_LENGTH
@@ -170,18 +195,59 @@ class OperationControlled(State):
                 self.ctx.servo.set_angle(self.ipap_angle)
 
             self.__read_sensors()
+            self.__check_alarms(self.ctx.messenger)
 
             time.sleep(0.0001)
 
-    def __calculate_angle(self):
+    def __calculate_angle_ipap(self):
         """Get servo angle based on IPAP."""
 
         if self.ipap != self.ipap_old:
-            self.ipap_angle = 20.009 * np.log(float(self.ipap)) + 37.997
-            self.ipap = self.ipap_old
+            if not self.iepap_index[int(self.ipap)]:
+                self.ipap_angle = 20.009 * np.log(float(self.ipap)) + 37.997
+            else:
+                self.ipap_angle = self.iepap_table[int(self.ipap)]
+            self.ipap_old = self.ipap
         else:
             difference = float(self.ipap - self.ipap_read)
-            self.ipap_angle = self.ipap_angle + 0.5 * difference
+            if difference > 0.5 or difference < -0.5:
+                self.ipap_angle = self.ipap_angle + 0.5 * difference
+
+        if self.ipap_angle > 115:
+            self.ipap_angle = 115
+        elif self.ipap_angle < 50:
+            self.ipap_angle = 50
+
+    def __calculate_angle_epap(self):
+        """Get servo angle based on IPAP."""
+
+        if self.epap != self.epap_old:
+            if not self.iepap_index[int(self.epap)]:
+                self.epap_angle = 20.009 * np.log(float(self.epap)) + 37.997
+            else:
+                self.epap_angle = self.iepap_table[int(self.epap)]
+            self.epap_old = self.epap
+        else:
+            difference = float(self.epap - self.epap_read)
+            if difference > 0.5 or difference < -0.5:
+                difference = float(self.epap - self.epap_read)
+                self.epap_angle = self.epap_angle + 0.5 * difference
+
+        if self.epap_angle < 50:
+            self.epap_angle = 50
+        elif self.epap_angle > 115:
+            self.epap_angle = 115
+
+    def __update_iepap_table(self):
+        """Update pressure angle table based."""
+
+        if abs(self.epap - self.epap_read) < 0.4:
+            self.iepap_table[int(self.epap)] = self.epap_angle
+            self.iepap_index[int(self.epap)] = 1
+
+        if abs(self.ipap - self.ipap_read) < 0.4:
+            self.iepap_table[int(self.ipap)] = self.ipap_angle
+            self.iepap_index[int(self.ipap)] = 1
 
     def __read_sensors(self):
         """Fetch readings from all the sensors."""
@@ -227,6 +293,26 @@ class OperationControlled(State):
             self.temperature_air = self.ctx.dht_air.temperature()
 
             self.dht_time_saved = time_now
+
+    def __check_alarms(self, msg: Messenger):
+        """Check if any alarms triggered.
+
+        Args:
+            msg (Messenger): Utility for sending messages.
+        """
+
+        triggered = []
+
+        if self.epap_read < self.pressure_min:
+            triggered.append({"type": "pressure_min", "criticality": "medium"})
+        elif self.ipap_read > self.pressure_max:
+            triggered.append({"type": "pressure_max", "criticality": "medium"})
+
+        if triggered:
+            for alarm in triggered:
+                if alarm["type"] not in self.active:
+                    self.active.append(alarm["type"])
+                    msg.send("alarm", alarm)
 
 
 class OperationAssisted(State):

@@ -2,6 +2,7 @@
 Main operation view.
 """
 
+import logging
 from typing import Dict, Optional
 
 import zmq
@@ -86,6 +87,9 @@ class OperationView(View):
                     vc_out=body["vc_out"],
                     oxygen=body["oxygen"],
                 )
+            elif topic == "alarm":
+                logging.info("Received new alarm <%s>", body["type"])
+                self.topbar.set_alarm(body["type"], body["criticality"])
         except zmq.Again:
             pass
 

@@ -29,22 +29,40 @@ class MonitorBar(sg.Column):
 
     def __init__(self):
         self.ipap = sg.Text(
-            "-", font=(FONT_FAMILY, FONT_SIZE_BIG, FONT_STYLE), size=(4, 1)
+            "-",
+            font=(FONT_FAMILY, FONT_SIZE_BIG, FONT_STYLE),
+            size=(4, 1),
+            justification="right",
         )
         self.epap = sg.Text(
-            "-", font=(FONT_FAMILY, FONT_SIZE_BIG, FONT_STYLE), size=(4, 1)
+            "-",
+            font=(FONT_FAMILY, FONT_SIZE_BIG, FONT_STYLE),
+            size=(4, 1),
+            justification="right",
         )
         self.freq = sg.Text(
-            "-", font=(FONT_FAMILY, FONT_SIZE_BIG, FONT_STYLE), size=(4, 1)
+            "-",
+            font=(FONT_FAMILY, FONT_SIZE_BIG, FONT_STYLE),
+            size=(4, 1),
+            justification="right",
         )
         self.vc_in = sg.Text(
-            "-", font=(FONT_FAMILY, FONT_SIZE_SMALL, FONT_STYLE), size=(3, 1)
+            "-",
+            font=(FONT_FAMILY, FONT_SIZE_SMALL, FONT_STYLE),
+            size=(3, 1),
+            justification="right",
         )
         self.vc_out = sg.Text(
-            "-", font=(FONT_FAMILY, FONT_SIZE_SMALL, FONT_STYLE), size=(3, 1)
+            "-",
+            font=(FONT_FAMILY, FONT_SIZE_SMALL, FONT_STYLE),
+            size=(3, 1),
+            justification="right",
         )
         self.oxygen = sg.Text(
-            "-", font=(FONT_FAMILY, FONT_SIZE_SMALL, FONT_STYLE), size=(3, 1)
+            "-",
+            font=(FONT_FAMILY, FONT_SIZE_SMALL, FONT_STYLE),
+            size=(4, 1),
+            justification="right",
         )
 
         self.lock_btn = sg.RealtimeButton("Bloquear", size=(9, 2))
@@ -83,7 +101,6 @@ class MonitorBar(sg.Column):
                         "rpm", font=(FONT_FAMILY, FONT_SIZE_BIG, FONT_STYLE)
                     ),
                 ]
-                + [sg.Text("", size=(2, 0))]
                 + [
                     sg.Text(
                         "V (in):",
@@ -143,9 +160,26 @@ class MonitorBar(sg.Column):
             oxygen (float): Value for oxygen percentage.
         """
 
-        self.ipap.update(ipap)
-        self.epap.update(epap)
-        self.freq.update(freq)
+        self.ipap.update("%.1f" % round(ipap, 1))
+        self.epap.update("%.1f" % round(epap, 1))
+        self.freq.update("%.1f" % round(freq, 1))
         self.vc_in.update(vc_in)
         self.vc_out.update(vc_out)
-        self.oxygen.update(oxygen)
+        self.oxygen.update("%.1f" % round(oxygen, 1))
+
+    def set_alarm(self, type: str, criticality: str):
+        """Change the colours of the labels to reflect an alarm.
+
+        Args:
+            type (str): Alarm type.
+            criticality (str): Level of criticality.
+        """
+
+        if type == "pressure_min":
+            self.epap.update(
+                text_color="orange" if criticality == "medium" else "red"
+            )
+        elif type == "pressure_max":
+            self.ipap.update(
+                text_color="orange" if criticality == "medium" else "red"
+            )
