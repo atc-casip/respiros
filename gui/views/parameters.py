@@ -1,34 +1,21 @@
-"""
-Input initial parameters for operation.
-"""
+from typing import Dict
 
-from typing import Dict, Optional
-
+import gui.events as events
 import PySimpleGUI as sg
 from gui.components import IESlider, NumericSlider
 from gui.config import cfg
-from gui.context import Context
-from gui.messenger import Messenger
+from gui.context import ctx
+from gui.messenger import msg
 
+from .operation import OperationView
 from .view import View
 
 
 class ParametersView(View):
-    """
-    Parameter selection for operation start.
-    """
+    """Parameter selection for operation start."""
 
-    # Sliders
-    ipap: NumericSlider
-    epap: NumericSlider
-    freq: NumericSlider
-    trigger: NumericSlider
-    ie: IESlider
-
-    # Buttons
-    start_btn: sg.Button
-
-    def __init__(self):
+    def __init__(self, app):
+        # Sliders
         self.ipap = NumericSlider(
             "Presión IPAP",
             metric="cmH\N{SUBSCRIPT TWO}O",
@@ -37,6 +24,7 @@ class ParametersView(View):
                 cfg["params"]["ipap"]["max"],
             ),
             default_value=cfg["params"]["ipap"]["default"],
+            key=events.IPAP_SLIDER_PARAMS,
         )
         self.epap = NumericSlider(
             "Presión EPAP",
@@ -46,6 +34,7 @@ class ParametersView(View):
                 cfg["params"]["epap"]["max"],
             ),
             default_value=cfg["params"]["epap"]["default"],
+            key=events.EPAP_SLIDER_PARAMS,
         )
         self.freq = NumericSlider(
             "Frecuencia",
@@ -55,6 +44,7 @@ class ParametersView(View):
                 cfg["params"]["freq"]["max"],
             ),
             default_value=cfg["params"]["freq"]["default"],
+            key=events.FREQ_SLIDER_PARAMS,
         )
         self.trigger = NumericSlider(
             "Trigger de flujo",
@@ -64,6 +54,7 @@ class ParametersView(View):
                 cfg["params"]["trigger"]["max"],
             ),
             default_value=cfg["params"]["trigger"]["default"],
+            key=events.TRIGGER_SLIDER_PARAMS,
         )
         self.ie = IESlider(
             inhale_max=cfg["params"]["inhale"]["max"],
@@ -72,11 +63,16 @@ class ParametersView(View):
                 cfg["params"]["inhale"]["default"],
                 cfg["params"]["exhale"]["default"],
             ),
+            key=events.IE_SLIDER_PARAMS,
         )
 
-        self.start_btn = sg.Button("Comenzar", size=(10, 2))
+        # Buttons
+        self.start_btn = sg.Button(
+            "Comenzar", size=(10, 2), key=events.START_BUTTON_PARAMS
+        )
 
         super().__init__(
+            app,
             [
                 [
                     sg.Text(
@@ -94,7 +90,7 @@ class ParametersView(View):
             pad=(373, 0),
         )
 
-    def set_up(self, ctx: Context):
+    def show(self):
         super().expand(expand_x=True, expand_y=True)
         self.ipap.expand()
         self.epap.expand()
@@ -102,26 +98,26 @@ class ParametersView(View):
         self.trigger.expand()
         self.ie.expand()
 
-    def handle_event(
-        self, event: str, values: Dict, ctx: Context, msg: Messenger
-    ) -> Optional[str]:
-        if event == self.ipap.slider.Key:
-            self.ipap.value = ctx.ipap = values[event]
+        super().show()
+
+    def handle_event(self, event: str, values: Dict):
+        if event == events.IPAP_SLIDER_PARAMS:
+            self.ipap.value = ctx.ipap = int(values[event])
             if self.ipap.value <= self.epap.value:
                 self.epap.value = ctx.epap = self.ipap.value - 1
-        elif event == self.epap.slider.Key:
-            self.epap.value = ctx.epap = values[event]
+        elif event == events.EPAP_SLIDER_PARAMS:
+            self.epap.value = ctx.epap = int(values[event])
             if self.epap.value >= self.ipap.value:
                 self.ipap.value = ctx.ipap = self.epap.value + 1
-        elif event == self.freq.slider.Key:
-            self.freq.value = ctx.freq = values[event]
-        elif event == self.trigger.slider.Key:
-            self.trigger.value = ctx.trigger = values[event]
-        elif event == self.ie.slider.Key:
-            self.ie.value = values[event]
+        elif event == events.FREQ_SLIDER_PARAMS:
+            self.freq.value = ctx.freq = int(values[event])
+        elif event == events.TRIGGER_SLIDER_PARAMS:
+            self.trigger.value = ctx.trigger = int(values[event])
+        elif event == events.IE_SLIDER_PARAMS:
+            self.ie.value = int(values[event])
             ctx.inhale = self.ie.value[0]
             ctx.exhale = self.ie.value[1]
-        elif event == self.start_btn.Key:
+        elif event == events.START_BUTTON_PARAMS:
             msg.send(
                 "operation",
                 {
@@ -133,5 +129,4 @@ class ParametersView(View):
                     "exhale": ctx.exhale,
                 },
             )
-            return "/operation"
-        return None
+            self.app.show_view(OperationView)

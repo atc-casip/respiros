@@ -1,14 +1,10 @@
-"""
-Main operation view.
-"""
-
 import logging
-from typing import Dict, Optional
+from typing import Dict
 
-import zmq
+import gui.events as events
 from gui.components import ControlPane, MonitorBar, PlotCanvas
-from gui.context import Context
-from gui.messenger import Messenger
+from gui.context import ctx
+from gui.messenger import msg
 
 from .view import View
 
@@ -18,10 +14,7 @@ N_SAMPLES = FIGURE_SECONDS / SAMPLE_PERIOD
 
 
 class OperationView(View):
-    """
-    This view allows the user to monitor and control the operation of the
-    system.
-    """
+    """Main monitorization and control view."""
 
     __first = True
 
@@ -31,76 +24,77 @@ class OperationView(View):
     volume_old = 0.0
     nsamples = N_SAMPLES
 
-    topbar: MonitorBar
-    canvas: PlotCanvas
-    menu: ControlPane
-
-    def __init__(self):
+    def __init__(self, app):
         self.topbar = MonitorBar()
         self.canvas = PlotCanvas(size=(650, 750), key="canvas")
         self.menu = ControlPane()
 
         super().__init__(
+            app,
             [[self.topbar], [self.canvas, self.menu]],
             pad=(0, 0),
         )
 
-    def set_up(self, ctx: Context):
+    def show(self):
         super().expand(expand_x=True, expand_y=True)
         self.topbar.expand()
         self.menu.expand()
 
-        self.menu.parameters.update_values(
-            ipap=ctx.ipap,
-            epap=ctx.epap,
-            freq=ctx.freq,
-            trigger=ctx.trigger,
-            inhale=ctx.inhale,
-            exhale=ctx.exhale,
-        )
+        self.menu.parameters.ipap.value = ctx.ipap
+        self.menu.parameters.epap.value = ctx.epap
+        self.menu.parameters.freq.value = ctx.freq
+        self.menu.parameters.trigger.value = ctx.trigger
+        self.menu.parameters.ie.value = ctx.inhale, ctx.exhale
 
         self.canvas.draw()
 
-    def handle_event(
-        self, event: str, values: Dict, ctx: Context, msg: Messenger
-    ) -> Optional[str]:
-        resp = self.menu.handle_event(event, values, ctx, msg)
+        super().show()
+
+    def handle_event(self, event: str, values: Dict):
+        self.menu.handle_event(event, values)
 
         if self.__first:
             msg.send("request-reading", {})
             self.__first = False
 
-        try:
-            [topic, body] = msg.recv()
-            if topic == "reading":
-                self.__interpolate(ctx, body)
-                self.canvas.update_plots(
-                    ctx.pressure_data, ctx.airflow_data, ctx.volume_data
-                )
-                msg.send("request-reading", {})
-            elif topic == "cycle":
-                self.topbar.update_values(
-                    ipap=body["ipap"],
-                    epap=body["epap"],
-                    freq=body["freq"],
-                    vc_in=body["vc_in"],
-                    vc_out=body["vc_out"],
-                    oxygen=body["oxygen"],
-                )
-            elif topic == "alarm":
-                logging.info("Received new alarm <%s>", body["type"])
-                self.topbar.set_alarm(body["type"], body["criticality"])
-        except zmq.Again:
-            pass
+        if event == events.ZMQ_READING:
+            self.__interpolate(values[event])
+            self.canvas.update_plots(
+                ctx.pressure_data, ctx.airflow_data, ctx.volume_data
+            )
+            msg.send("request-reading", {})
+        elif event == events.ZMQ_CYCLE:
+            self.topbar.ipap.value = values[event]["ipap"]
+            self.topbar.epap.value = values[event]["epap"]
+            self.topbar.freq.value = values[event]["freq"]
+            self.topbar.vc_in.value = values[event]["vc_in"]
+            self.topbar.vc_out.value = values[event]["vc_out"]
+            self.topbar.oxygen.value = values[event]["oxygen"]
+        elif event == events.ZMQ_ALARM:
+            logging.info(
+                "Received alarm <%s> with criticality: %s",
+                values[event]["type"],
+                values[event]["criticality"],
+            )
 
-        return resp
+            if values[event]["type"] == "pressure_min":
+                self.topbar.epap.show_alarm(values[event]["criticality"])
+            elif values[event]["type"] == "pressure_max":
+                self.topbar.ipap.show_alarm(values[event]["criticality"])
+            elif values[event]["type"] == "volume_min":
+                pass
+            elif values[event]["type"] == "volume_max":
+                pass
+            elif values[event]["type"] in {"oxygen_min", "oxygen_max"}:
+                self.topbar.oxygen.show_alarm(values[event]["criticality"])
+            elif values[event]["type"] == "freq_max":
+                self.topbar.freq.show_alarm(values[event]["criticality"])
 
-    def __interpolate(self, ctx: Context, reading: Dict):
+    def __interpolate(self, reading: Dict):
         """Interpolate the given reading in the time series.
 
         Args:
-            ctx (Context): Application context.
-            reading (Dict): Values of the new reading.
+            reading (Dict): The new values.
         """
 
         pressure = float(reading["pressure"])

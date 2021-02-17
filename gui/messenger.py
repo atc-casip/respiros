@@ -1,7 +1,3 @@
-"""
-ZeroMQ sockets for interprocess communication.
-"""
-
 import atexit
 import json
 import logging
@@ -120,3 +116,6 @@ class Messenger:
             zmq.NOBLOCK if not block else 0
         )
         return [topic.decode(), json.loads(body)]
+
+
+msg = Messenger()

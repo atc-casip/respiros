@@ -1,31 +1,19 @@
-"""
-System control pane during operation.
-"""
+from typing import Dict
 
-from typing import Dict, Optional
-
+import gui.events as events
 import PySimpleGUI as sg
 from gui.config import cfg
-from gui.context import Context
-from gui.messenger import Messenger
+from gui.context import ctx
+from gui.messenger import msg
 
 from .sliders import IESlider, NumericSlider
 
-FONT_FAMILY = "Helvetica"
-FONT_SIZE = 20
-
 
 class ParametersTab(sg.Tab):
-    """Tab for parameter input."""
-
-    # Sliders
-    ipap: NumericSlider
-    epap: NumericSlider
-    freq: NumericSlider
-    trigger: NumericSlider
-    ie: IESlider
+    """Tab for operation control."""
 
     def __init__(self):
+        # Sliders
         self.ipap = NumericSlider(
             "Presión IPAP",
             metric="cmH\N{SUBSCRIPT TWO}O",
@@ -34,6 +22,7 @@ class ParametersTab(sg.Tab):
                 cfg["params"]["ipap"]["max"],
             ),
             default_value=cfg["params"]["ipap"]["default"],
+            key=events.IPAP_SLIDER_OPER,
         )
         self.epap = NumericSlider(
             "Presión EPAP",
@@ -43,6 +32,7 @@ class ParametersTab(sg.Tab):
                 cfg["params"]["epap"]["max"],
             ),
             default_value=cfg["params"]["epap"]["default"],
+            key=events.EPAP_SLIDER_OPER,
         )
         self.freq = NumericSlider(
             "Frecuencia",
@@ -52,6 +42,7 @@ class ParametersTab(sg.Tab):
                 cfg["params"]["freq"]["max"],
             ),
             default_value=cfg["params"]["freq"]["default"],
+            key=events.FREQ_SLIDER_OPER,
         )
         self.trigger = NumericSlider(
             "Trigger de flujo",
@@ -61,6 +52,7 @@ class ParametersTab(sg.Tab):
                 cfg["params"]["trigger"]["max"],
             ),
             default_value=cfg["params"]["trigger"]["default"],
+            key=events.TRIGGER_SLIDER_OPER,
         )
         self.ie = IESlider(
             inhale_max=cfg["params"]["inhale"]["max"],
@@ -69,6 +61,7 @@ class ParametersTab(sg.Tab):
                 cfg["params"]["inhale"]["default"],
                 cfg["params"]["exhale"]["default"],
             ),
+            key=events.IE_SLIDER_OPER,
         )
 
         super().__init__(
@@ -90,63 +83,33 @@ class ParametersTab(sg.Tab):
         self.trigger.expand()
         self.ie.expand()
 
-    def update_values(
-        self,
-        ipap: int,
-        epap: int,
-        freq: int,
-        trigger: int,
-        inhale: int,
-        exhale: int,
-    ):
-        """Update the tab's sliders with new values.
-
-        Args:
-            ipap (int): The value for IPAP.
-            epap (int): The value for EPAP.
-            freq (int): The value for respiratory frequency.
-            trigger (int): The value for the airflow trigger.
-            inhale (int): The value for inhale relative duration.
-            exhale (int): The value for exhale relative duration.
-        """
-
-        self.ipap.value = ipap
-        self.epap.value = epap
-        self.freq.value = freq
-        self.trigger.value = trigger
-        self.ie.value = (inhale, exhale)
-
-    def handle_event(
-        self, event: str, values: Dict, ctx: Context, msg: Messenger
-    ):
+    def handle_event(self, event: str, values: Dict):
         """React to the event provided by the event loop.
 
         Args:
             event (str): The key of the element that dispatched the event.
             values (Dict): Dictionary of values present in the window.
-            ctx (Context): Application context.
-            msg (Messenger): Messaging utility for inter-process communication.
         """
 
         change = False
-        if event == self.ipap.slider.Key:
-            self.ipap.value = ctx.ipap = values[event]
+        if event == events.IPAP_SLIDER_OPER:
+            self.ipap.value = ctx.ipap = int(values[event])
             change = True
             if self.ipap.value <= self.epap.value:
                 self.epap.value = ctx.epap = self.ipap.value - 1
-        elif event == self.epap.slider.Key:
-            self.epap.value = ctx.epap = values[event]
+        elif event == events.EPAP_SLIDER_OPER:
+            self.epap.value = ctx.epap = int(values[event])
             change = True
             if self.epap.value >= self.ipap.value:
                 self.ipap.value = ctx.ipap = self.epap.value + 1
-        elif event == self.freq.slider.Key:
-            self.freq.value = ctx.freq = values[event]
+        elif event == events.FREQ_SLIDER_OPER:
+            self.freq.value = ctx.freq = int(values[event])
             change = True
-        elif event == self.trigger.slider.Key:
-            self.trigger.value = ctx.trigger = values[event]
+        elif event == events.TRIGGER_SLIDER_OPER:
+            self.trigger.value = ctx.trigger = int(values[event])
             change = True
-        elif event == self.ie.slider.Key:
-            self.ie.value = values[event]
+        elif event == events.IE_SLIDER_OPER:
+            self.ie.value = int(values[event])
             ctx.inhale = self.ie.value[0]
             ctx.exhale = self.ie.value[1]
             change = True
@@ -166,27 +129,10 @@ class ParametersTab(sg.Tab):
 
 
 class AlarmsTab(sg.Tab):
-    """Tab for alarms' settings."""
-
-    # Frames
-    pressure_frame: sg.Frame
-    volume_frame: sg.Frame
-    oxygen_frame: sg.Frame
-    freq_frame: sg.Frame
-
-    # Sliders
-    pressure_min: NumericSlider
-    pressure_max: NumericSlider
-    volume_min: NumericSlider
-    volume_max: NumericSlider
-    oxygen_min: NumericSlider
-    oxygen_max: NumericSlider
-    freq_max: NumericSlider
-
-    # Buttons
-    commit_btn: sg.Button
+    """Tab for alarm range control."""
 
     def __init__(self):
+        # Sliders
         self.pressure_min = NumericSlider(
             "Min",
             metric="cmH\N{SUBSCRIPT TWO}O",
@@ -195,6 +141,7 @@ class AlarmsTab(sg.Tab):
                 cfg["alarms"]["pressure"]["max"],
             ),
             default_value=cfg["alarms"]["pressure"]["min"],
+            key=events.PRESSURE_MIN_SLIDER_OPER,
         )
         self.pressure_max = NumericSlider(
             "Max",
@@ -204,6 +151,7 @@ class AlarmsTab(sg.Tab):
                 cfg["alarms"]["pressure"]["max"],
             ),
             default_value=cfg["alarms"]["pressure"]["max"],
+            key=events.PRESSURE_MAX_SLIDER_OPER,
         )
         self.volume_min = NumericSlider(
             "Min",
@@ -213,6 +161,7 @@ class AlarmsTab(sg.Tab):
                 cfg["alarms"]["volume"]["max"],
             ),
             default_value=cfg["alarms"]["volume"]["min"],
+            key=events.VOLUME_MIN_SLIDER_OPER,
         )
         self.volume_max = NumericSlider(
             "Max",
@@ -222,6 +171,7 @@ class AlarmsTab(sg.Tab):
                 cfg["alarms"]["volume"]["max"],
             ),
             default_value=cfg["alarms"]["volume"]["max"],
+            key=events.VOLUME_MAX_SLIDER_OPER,
         )
         self.oxygen_min = NumericSlider(
             "Min",
@@ -231,6 +181,7 @@ class AlarmsTab(sg.Tab):
                 cfg["alarms"]["oxygen"]["max"],
             ),
             default_value=cfg["alarms"]["oxygen"]["min"],
+            key=events.OXYGEN_MIN_SLIDER_OPER,
         )
         self.oxygen_max = NumericSlider(
             "Max",
@@ -240,6 +191,7 @@ class AlarmsTab(sg.Tab):
                 cfg["alarms"]["oxygen"]["max"],
             ),
             default_value=cfg["alarms"]["oxygen"]["max"],
+            key=events.OXYGEN_MAX_SLIDER_OPER,
         )
         self.freq_max = NumericSlider(
             "Max",
@@ -249,8 +201,10 @@ class AlarmsTab(sg.Tab):
                 cfg["alarms"]["freq"]["max"],
             ),
             default_value=cfg["alarms"]["freq"]["max"],
+            key=events.FREQ_MAX_SLIDER_OPER,
         )
 
+        # Frames
         self.pressure_frame = sg.Frame(
             "Presión",
             [[self.pressure_min, self.pressure_max]],
@@ -270,7 +224,10 @@ class AlarmsTab(sg.Tab):
             "Frecuencia", [[self.freq_max]], font=("Helvetica", 15)
         )
 
-        self.commit_btn = sg.Button("Aplicar", size=(10, 2))
+        # Buttons
+        self.commit_btn = sg.Button(
+            "Aplicar", size=(10, 2), key=events.APPLY_ALARMS_BUTTON_OPER
+        )
 
         super().__init__(
             "Alarmas",
@@ -301,45 +258,41 @@ class AlarmsTab(sg.Tab):
 
         self.commit_btn.expand(expand_x=True)
 
-    def handle_event(
-        self, event: str, values: Dict, ctx: Context, msg: Messenger
-    ):
+    def handle_event(self, event: str, values: Dict):
         """React to the event provided by the event loop.
 
         Args:
             event (str): The key of the element that dispatched the event.
             values (Dict): Dictionary of values present in the window.
-            ctx (Context): Application context.
-            msg (Messenger): Messaging utility for inter-process communication.
         """
 
-        if event == self.pressure_min.slider.Key:
-            self.pressure_min.value = ctx.pressure_min = values[event]
+        if event == events.PRESSURE_MIN_SLIDER_OPER:
+            self.pressure_min.value = ctx.pressure_min = int(values[event])
             if self.pressure_min.value >= self.pressure_max.value:
                 self.pressure_max.value = self.pressure_min.value + 1
-        elif event == self.pressure_max.slider.Key:
-            self.pressure_max.value = ctx.pressure_max = values[event]
+        elif event == events.PRESSURE_MAX_SLIDER_OPER:
+            self.pressure_max.value = ctx.pressure_max = int(values[event])
             if self.pressure_max.value <= self.pressure_min.value:
                 self.pressure_min.value = self.pressure_max.value - 1
-        elif event == self.volume_min.slider.Key:
-            self.volume_min.value = ctx.volume_min = values[event]
+        elif event == events.VOLUME_MIN_SLIDER_OPER:
+            self.volume_min.value = ctx.volume_min = int(values[event])
             if self.volume_min.value >= self.volume_max.value:
                 self.volume_max.value = self.volume_min.value + 1
-        elif event == self.volume_max.slider.Key:
-            self.volume_max.value = ctx.volume_max = values[event]
+        elif event == events.VOLUME_MAX_SLIDER_OPER:
+            self.volume_max.value = ctx.volume_max = int(values[event])
             if self.volume_max.value <= self.volume_min.value:
                 self.volume_min.value = self.volume_max.value - 1
-        elif event == self.oxygen_min.slider.Key:
-            self.oxygen_min.value = ctx.oxygen_min = values[event]
+        elif event == events.OXYGEN_MIN_SLIDER_OPER:
+            self.oxygen_min.value = ctx.oxygen_min = int(values[event])
             if self.oxygen_min.value >= self.oxygen_max.value:
                 self.oxygen_max.value = self.oxygen_min.value + 1
-        elif event == self.oxygen_max.slider.Key:
-            self.oxygen_max.value = ctx.oxygen_max = values[event]
+        elif event == events.OXYGEN_MAX_SLIDER_OPER:
+            self.oxygen_max.value = ctx.oxygen_max = int(values[event])
             if self.oxygen_max.value <= self.oxygen_min.value:
                 self.oxygen_min.value = self.oxygen_max.value - 1
-        elif event == self.freq_max.slider.Key:
-            self.freq_max.value = ctx.freq_max = values[event]
-        elif event == self.commit_btn.Key:
+        elif event == events.FREQ_MAX_SLIDER_OPER:
+            self.freq_max.value = ctx.freq_max = int(values[event])
+        elif event == events.APPLY_ALARMS_BUTTON_OPER:
             msg.send(
                 "change-alarms",
                 {
@@ -355,12 +308,10 @@ class AlarmsTab(sg.Tab):
 
 
 class HistoryTab(sg.Tab):
-    """Tab for alarms' settings."""
-
-    # Buttons
-    silence_btn: sg.Button
+    """Tab that shows the history of triggered alarms."""
 
     def __init__(self):
+        # Buttons
         self.silence_btn = sg.Button("Silenciar alarmas", size=(10, 2))
 
         super().__init__(
@@ -373,111 +324,12 @@ class HistoryTab(sg.Tab):
     def expand(self):
         self.silence_btn.expand(expand_x=True)
 
-    def handle_event(
-        self, event: str, values: Dict, ctx: Context, msg: Messenger
-    ) -> Optional[str]:
+    def handle_event(self, event: str, values: Dict):
         """React to the event provided by the event loop.
 
         Args:
             event (str): The key of the element that dispatched the event.
             values (Dict): Dictionary of values present in the window.
-            ctx (Context): Application context.
-            msg (Messenger): Messaging utility for inter-process communication.
-
-        Returns:
-            Optional[str]: The route of the next view, or None.
         """
 
-        return None
-
-
-class ControlPane(sg.Column):
-    """Pane with tabs for system control."""
-
-    parameters: ParametersTab
-    alarms: AlarmsTab
-    history: HistoryTab
-
-    tabs: sg.TabGroup
-
-    parameters_btn: sg.Button
-    alarms_btn: sg.Button
-    history_btn: sg.Button
-
-    __current_tab: sg.Tab
-
-    def __init__(self):
-        self.parameters = ParametersTab()
-        self.alarms = AlarmsTab()
-        self.history = HistoryTab()
-
-        self.tabs = sg.TabGroup(
-            [[self.parameters, self.alarms, self.history]],
-            font=(FONT_FAMILY, FONT_SIZE),
-            border_width=0,
-        )
-
-        self.parameters_btn = sg.Button("Parámetros", size=(10, 2))
-        self.alarms_btn = sg.Button("Alarmas", size=(10, 2))
-        self.history_btn = sg.Button("Histórico", size=(10, 2))
-
-        self.__current_tab = self.parameters
-
-        super().__init__(
-            [
-                [self.tabs],
-                [self.parameters_btn, self.alarms_btn, self.history_btn],
-            ]
-        )
-
-    def expand(self):
-        super().expand(expand_x=True, expand_y=True)
-
-        self.tabs.expand(expand_x=True, expand_y=True)
-
-        self.parameters.expand()
-        self.alarms.expand()
-        self.history.expand()
-
-        self.parameters_btn.expand(expand_x=True)
-        self.alarms_btn.expand(expand_x=True)
-        self.history_btn.expand(expand_x=True)
-
-    def handle_event(
-        self, event: str, values: Dict, ctx: Context, msg: Messenger
-    ) -> Optional[str]:
-        """React to the event provided by the event loop.
-
-        Args:
-            event (str): The key of the element that dispatched the event.
-            values (Dict): Dictionary of values present in the window.
-            ctx (Context): Application context.
-            msg (Messenger): Messaging utility for inter-process communication.
-
-        Returns:
-            Optional[str]: The route of the next view, or None.
-        """
-
-        if (
-            event == self.parameters_btn.Key
-            and self.__current_tab is not self.parameters
-        ):
-            self.__current_tab.update(visible=False)
-            self.__current_tab = self.parameters
-            self.__current_tab.select()
-        elif (
-            event == self.alarms_btn.Key
-            and self.__current_tab is not self.alarms
-        ):
-            self.__current_tab.update(visible=False)
-            self.__current_tab = self.alarms
-            self.__current_tab.select()
-        elif (
-            event == self.history_btn.Key
-            and self.__current_tab is not self.history
-        ):
-            self.__current_tab.update(visible=False)
-            self.__current_tab = self.history
-            self.__current_tab.select()
-
-        return self.__current_tab.handle_event(event, values, ctx, msg)
+        return
