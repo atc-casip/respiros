@@ -1,9 +1,4 @@
-"""
-Slider components for user input.
-"""
-
-from abc import ABC, abstractmethod
-from typing import Any, Tuple, Union
+from typing import Tuple, Union
 
 import PySimpleGUI as sg
 
@@ -11,45 +6,8 @@ FONT_FAMILY = "Helvetica"
 FONT_SIZE = 15
 
 
-class ParameterSlider(ABC, sg.Column):
-    """Custom slider component for parameter selection."""
-
-    title_label: sg.Text
-    value_label: sg.Text
-    slider: sg.Slider
-
-    @property
-    @abstractmethod
-    def value(self) -> Any:
-        """The slider's value.
-
-        Returns:
-            Any: The current value.
-        """
-
-    @value.setter
-    @abstractmethod
-    def value(self, new_value: Any):
-        """Change the value of the slider.
-
-        Args:
-            new_value (Any): The new value.
-        """
-
-    def expand(self):
-        """Expand the slider in the X axis."""
-
-        super().expand(expand_x=True)
-        self.title_label.expand(expand_x=True)
-        self.slider.expand(expand_x=True)
-
-
-class NumericSlider(ParameterSlider):
+class NumericSlider(sg.Column):
     """Slider for numerical parameters."""
-
-    __value: int
-
-    metric_label: sg.Text
 
     def __init__(
         self,
@@ -57,6 +15,7 @@ class NumericSlider(ParameterSlider):
         metric: str,
         values: Tuple[int, int],
         default_value: int,
+        key: str,
     ):
         self.__value = default_value
 
@@ -75,13 +34,14 @@ class NumericSlider(ParameterSlider):
             orientation="h",
             size=(0, 50),
             enable_events=True,
+            key=key,
         )
 
         super().__init__(
             [
                 [self.title_label, self.value_label, self.metric_label],
                 [self.slider],
-            ]
+            ],
         )
 
     @property
@@ -89,25 +49,28 @@ class NumericSlider(ParameterSlider):
         return self.__value
 
     @value.setter
-    def value(self, new_value: float):
-        self.__value = int(new_value)
+    def value(self, value: int):
+        self.__value = value
+        self.value_label.update(value)
+        self.slider.update(value)
 
-        self.value_label.update(self.__value)
-        self.slider.update(self.__value)
+    def expand(self):
+        super().expand(expand_x=True)
+        self.title_label.expand(expand_x=True)
+        self.slider.expand(expand_x=True)
 
 
-class IESlider(ParameterSlider):
+class IESlider(sg.Column):
     """Special slider for the inhale-exhale relation."""
-
-    __value: int
 
     def __init__(
         self,
         inhale_max: int,
         exhale_max: int,
         default_value: Tuple[int, int],
+        key: str,
     ):
-        self.__value = self.__tuple_to_int(default_value)
+        self.__value = self.__ie_to_int(default_value)
 
         self.title_label = sg.Text(
             "Relación I:E", font=(FONT_FAMILY, FONT_SIZE)
@@ -125,6 +88,7 @@ class IESlider(ParameterSlider):
             orientation="h",
             size=(0, 50),
             enable_events=True,
+            key=key,
         )
 
         super().__init__([[self.title_label, self.value_label], [self.slider]])
@@ -139,29 +103,30 @@ class IESlider(ParameterSlider):
         return inhale, exhale
 
     @value.setter
-    def value(self, new_value: Union[Tuple[int, int], float]):
-        if isinstance(new_value, float):
-            self.__value = int(new_value)
+    def value(self, value: Union[Tuple[int, int], float]):
+        if not isinstance(value, tuple):
+            self.__value = value
 
-            str_value = "1:1"
-            if self.__value > 0:
-                str_value = f"1:{self.__value+1}"
-            elif self.__value < 0:
-                str_value = f"{abs(self.__value)+1}:1"
-
-            self.value_label.update(str_value)
+            self.value_label.update(
+                ":".join(str(i) for i in self.__int_to_ie(self.__value))
+            )
             self.slider.update(self.__value)
         else:
-            self.__value = self.__tuple_to_int(new_value)
+            self.__value = self.__ie_to_int(value)
 
-            self.value_label.update(f"{new_value[0]}:{new_value[1]}")
+            self.value_label.update(f"{value[0]}:{value[1]}")
             self.slider.update(self.__value)
 
-    def __tuple_to_int(self, values: Tuple[int, int]) -> int:
+    def expand(self):
+        super().expand(expand_x=True)
+        self.title_label.expand(expand_x=True)
+        self.slider.expand(expand_x=True)
+
+    def __ie_to_int(self, values: Tuple[int, int]) -> int:
         """Obtain the single integer version of the inhale-exhale relation.
 
         Args:
-            values (Tuple[int, int]): Values as a tuple.
+            values (Tuple[int, int]): Value as a tuple.
 
         Returns:
             int: The single integer representation.
@@ -173,3 +138,20 @@ class IESlider(ParameterSlider):
         elif values[1] > 1:
             int_value = values[1] - 1
         return int_value
+
+    def __int_to_ie(self, value: int) -> Tuple[int, int]:
+        """Obtain the tuple representation of the inhale-exhale relation.
+
+        Args:
+            value (int): Single integer representation.
+
+        Returns:
+            Tuple[int, int]: Value as a tuple.
+        """
+
+        if value > 0:
+            return 1, value + 1
+        elif value < 0:
+            return abs(value) + 1, 1
+        else:
+            return 1, 1

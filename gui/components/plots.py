@@ -1,7 +1,3 @@
-"""
-Plots shown on the GUI.
-"""
-
 import tkinter
 from typing import List
 
@@ -98,7 +94,7 @@ class PlotCanvas(sg.Canvas):
             )
 
             # Create GUI element
-            self.graph = FigureCanvasTkAgg(self.fig, self.TKCanvas)
+            self.graph = FigureCanvasTkAgg(self.fig, super().TKCanvas)
             self.graph.draw()
             self.graph.get_tk_widget().pack(
                 side=tkinter.TOP, fill=tkinter.BOTH, expand=1
