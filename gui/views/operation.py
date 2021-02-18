@@ -27,32 +27,30 @@ class OperationView(View):
     def __init__(self, app):
         self.topbar = MonitorBar()
         self.canvas = PlotCanvas(size=(650, 750), key="canvas")
-        self.menu = ControlPane()
+        self.control_pane = ControlPane()
 
         super().__init__(
             app,
-            [[self.topbar], [self.canvas, self.menu]],
+            [[self.topbar], [self.canvas, self.control_pane]],
             pad=(0, 0),
         )
 
     def show(self):
         super().expand(expand_x=True, expand_y=True)
         self.topbar.expand()
-        self.menu.expand()
+        self.control_pane.expand()
 
-        self.menu.parameters.ipap.value = ctx.ipap
-        self.menu.parameters.epap.value = ctx.epap
-        self.menu.parameters.freq.value = ctx.freq
-        self.menu.parameters.trigger.value = ctx.trigger
-        self.menu.parameters.ie.value = ctx.inhale, ctx.exhale
+        self.control_pane.parameters.ipap.value = ctx.ipap
+        self.control_pane.parameters.epap.value = ctx.epap
+        self.control_pane.parameters.freq.value = ctx.freq
+        self.control_pane.parameters.trigger.value = ctx.trigger
+        self.control_pane.parameters.ie.value = ctx.inhale, ctx.exhale
 
         self.canvas.draw()
 
         super().show()
 
     def handle_event(self, event: str, values: Dict):
-        self.menu.handle_event(event, values)
-
         if self.__first:
             msg.send("request-reading", {})
             self.__first = False
@@ -89,6 +87,10 @@ class OperationView(View):
                 self.topbar.oxygen.show_alarm(values[event]["criticality"])
             elif values[event]["type"] == "freq_max":
                 self.topbar.freq.show_alarm(values[event]["criticality"])
+        elif event == events.ZMQ_OPER_MODE:
+            self.control_pane.mode_label.update(values[event]["mode"].upper())
+
+        self.control_pane.handle_event(event, values)
 
     def __interpolate(self, reading: Dict):
         """Interpolate the given reading in the time series.

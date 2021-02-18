@@ -1,3 +1,4 @@
+from abc import ABCMeta, abstractmethod
 from typing import Dict
 
 import gui.events as events
@@ -9,7 +10,35 @@ from gui.messenger import msg
 from .sliders import IESlider, NumericSlider
 
 
-class ParametersTab(sg.Tab):
+class ControlTab(sg.Column, metaclass=ABCMeta):
+    """Base class for tabs in the control pane."""
+
+    def __init__(self, title: str, *args, **kwargs):
+        super().__init__(visible=False, *args, **kwargs)
+        self.__title = title
+
+    @property
+    def title(self) -> str:
+        return self.__title
+
+    def show(self):
+        super().update(visible=True)
+
+    def hide(self):
+        super().update(visible=False)
+
+    @abstractmethod
+    def handle_event(self, event: str, values: Dict):
+        """Perform the appropiate logic in response to an event.
+
+        Args:
+            event (str): The event itself.
+            values (Dict): This dict holds all the values of the views'
+            components.
+        """
+
+
+class ParametersTab(ControlTab):
     """Tab for operation control."""
 
     def __init__(self):
@@ -73,24 +102,19 @@ class ParametersTab(sg.Tab):
                 [self.trigger],
                 [self.ie],
             ],
-            border_width=10,
         )
 
-    def expand(self):
+    def show(self):
+        super().expand(expand_x=True, expand_y=True)
         self.ipap.expand()
         self.epap.expand()
         self.freq.expand()
         self.trigger.expand()
         self.ie.expand()
 
+        super().show()
+
     def handle_event(self, event: str, values: Dict):
-        """React to the event provided by the event loop.
-
-        Args:
-            event (str): The key of the element that dispatched the event.
-            values (Dict): Dictionary of values present in the window.
-        """
-
         change = False
         if event == events.IPAP_SLIDER_OPER:
             self.ipap.value = ctx.ipap = int(values[event])
@@ -128,7 +152,7 @@ class ParametersTab(sg.Tab):
             )
 
 
-class AlarmsTab(sg.Tab):
+class AlarmsTab(ControlTab):
     """Tab for alarm range control."""
 
     def __init__(self):
@@ -238,11 +262,10 @@ class AlarmsTab(sg.Tab):
                 [self.oxygen_frame],
                 [self.freq_frame],
             ],
-            border_width=10,
-            visible=False,
         )
 
-    def expand(self):
+    def show(self):
+        super().expand(expand_x=True, expand_y=True)
         self.pressure_frame.expand(expand_x=True)
         self.volume_frame.expand(expand_x=True)
         self.oxygen_frame.expand(expand_x=True)
@@ -258,14 +281,9 @@ class AlarmsTab(sg.Tab):
 
         self.commit_btn.expand(expand_x=True)
 
+        super().show()
+
     def handle_event(self, event: str, values: Dict):
-        """React to the event provided by the event loop.
-
-        Args:
-            event (str): The key of the element that dispatched the event.
-            values (Dict): Dictionary of values present in the window.
-        """
-
         if event == events.PRESSURE_MIN_SLIDER_OPER:
             self.pressure_min.value = ctx.pressure_min = int(values[event])
             if self.pressure_min.value >= self.pressure_max.value:
@@ -307,7 +325,7 @@ class AlarmsTab(sg.Tab):
             )
 
 
-class HistoryTab(sg.Tab):
+class HistoryTab(ControlTab):
     """Tab that shows the history of triggered alarms."""
 
     def __init__(self):
@@ -317,19 +335,13 @@ class HistoryTab(sg.Tab):
         super().__init__(
             "Histórico",
             [[self.silence_btn], [sg.Text("hist")]],
-            border_width=10,
-            visible=False,
         )
 
-    def expand(self):
+    def show(self):
+        super().expand(expand_x=True, expand_y=True)
         self.silence_btn.expand(expand_x=True)
 
+        super().show()
+
     def handle_event(self, event: str, values: Dict):
-        """React to the event provided by the event loop.
-
-        Args:
-            event (str): The key of the element that dispatched the event.
-            values (Dict): Dictionary of values present in the window.
-        """
-
         return
