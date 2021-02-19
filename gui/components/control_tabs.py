@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from gui.components.alarm_card import AlarmCard
 from typing import Dict
 
 import gui.events as events
@@ -272,7 +273,10 @@ class AlarmsTab(ControlTab):
 
         # Buttons
         self.commit_btn = sg.Button(
-            "Aplicar", size=(10, 2), key=events.APPLY_ALARMS_BUTTON_OPER
+            "Aplicar",
+            size=(10, 2),
+            font=("Helvetica", 12),
+            key=events.APPLY_ALARMS_BUTTON_OPER,
         )
 
         super().__init__(
@@ -372,16 +376,30 @@ class HistoryTab(ControlTab):
 
     def __init__(self):
         # Buttons
-        self.silence_btn = sg.Button("Silenciar alarmas", size=(10, 2))
+        self.silence_btn = sg.Button(
+            "Silenciar alarmas",
+            size=(10, 2),
+            font=("Helvetica", 12),
+        )
+
+        # Alarm cards
+        self.alarm_cards = []
+        for i in range(10):
+            if i == 9:
+                self.alarm_cards.append(AlarmCard(last=True))
+            else:
+                self.alarm_cards.append(AlarmCard())
 
         super().__init__(
             "Histórico",
-            [[self.silence_btn], [sg.Text("hist")]],
+            [[self.silence_btn]] + [[card] for card in self.alarm_cards],
         )
 
     def show(self):
         super().expand(expand_x=True, expand_y=True)
         self.silence_btn.expand(expand_x=True)
+        for card in self.alarm_cards:
+            card.expand()
 
         super().show()
 
@@ -393,3 +411,7 @@ class HistoryTab(ControlTab):
 
     def handle_event(self, event: str, values: Dict):
         return
+
+    def refresh_alarms(self):
+        for a, c in zip(ctx.alarms, self.alarm_cards):
+            c.update(a.type, a.criticality, a.timestamp)

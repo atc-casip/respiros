@@ -3,7 +3,7 @@ from typing import Dict
 
 import gui.events as events
 from gui.components import ControlPane, MonitorBar, PlotCanvas
-from gui.context import ctx
+from gui.context import Alarm, ctx
 from gui.messenger import msg
 
 from .view import View
@@ -77,18 +77,30 @@ class OperationView(View):
                 values[event]["criticality"],
             )
 
-            if values[event]["type"] == "pressure_min":
-                self.topbar.epap.show_alarm(values[event]["criticality"])
-            elif values[event]["type"] == "pressure_max":
-                self.topbar.ipap.show_alarm(values[event]["criticality"])
-            elif values[event]["type"] == "volume_min":
+            alarm = Alarm(
+                values[event]["type"],
+                values[event]["criticality"],
+                float(values[event]["timestamp"]),
+            )
+
+            if alarm.type == "pressure_min":
+                self.topbar.epap.show_alarm(alarm.criticality)
+            elif alarm.type == "pressure_max":
+                self.topbar.ipap.show_alarm(alarm.criticality)
+            elif alarm.type == "volume_min":
                 pass
-            elif values[event]["type"] == "volume_max":
+            elif alarm.type == "volume_max":
                 pass
-            elif values[event]["type"] in {"oxygen_min", "oxygen_max"}:
-                self.topbar.oxygen.show_alarm(values[event]["criticality"])
-            elif values[event]["type"] == "freq_max":
-                self.topbar.freq.show_alarm(values[event]["criticality"])
+            elif alarm.type in {"oxygen_min", "oxygen_max"}:
+                self.topbar.oxygen.show_alarm(alarm.criticality)
+            elif alarm.type == "freq_max":
+                self.topbar.freq.show_alarm(alarm.criticality)
+
+            if alarm.criticality != "none":
+                if len(ctx.alarms) == 10:
+                    ctx.alarms = ctx.alarms[1:]
+                ctx.alarms.append(alarm)
+                self.control_pane.history.refresh_alarms()
         elif event == events.ZMQ_OPER_MODE:
             self.control_pane.mode_label.update(values[event]["mode"].upper())
             # TODO: Change sliders depending on the current mode

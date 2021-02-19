@@ -68,7 +68,10 @@ class ParametersView(View):
 
         # Buttons
         self.start_btn = sg.Button(
-            "Comenzar", size=(10, 2), key=events.START_BUTTON_PARAMS
+            "Comenzar",
+            size=(10, 2),
+            font=("Helvetica", 12),
+            key=events.START_BUTTON_PARAMS,
         )
 
         super().__init__(

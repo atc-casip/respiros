@@ -25,10 +25,21 @@ class ControlPane(sg.Column):
 
         # Buttons
         self.parameters_btn = sg.Button(
-            self.parameters.title, size=(10, 2), disabled=True
+            self.parameters.title,
+            size=(10, 2),
+            font=("Helvetica", 12),
+            disabled=True,
         )
-        self.alarms_btn = sg.Button(self.alarms.title, size=(10, 2))
-        self.history_btn = sg.Button(self.history.title, size=(10, 2))
+        self.alarms_btn = sg.Button(
+            self.alarms.title,
+            size=(10, 2),
+            font=("Helvetica", 12),
+        )
+        self.history_btn = sg.Button(
+            self.history.title,
+            size=(10, 2),
+            font=("Helvetica", 12),
+        )
 
         # Misc
         self.expander = sg.Text()

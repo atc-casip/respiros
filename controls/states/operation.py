@@ -304,9 +304,21 @@ class OperationControlled(State):
         triggered = []
 
         if self.epap_read < self.pressure_min:
-            triggered.append({"type": "pressure_min", "criticality": "medium"})
+            triggered.append(
+                {
+                    "type": "pressure_min",
+                    "criticality": "medium",
+                    "timestamp": time.time(),
+                }
+            )
         elif self.ipap_read > self.pressure_max:
-            triggered.append({"type": "pressure_max", "criticality": "medium"})
+            triggered.append(
+                {
+                    "type": "pressure_max",
+                    "criticality": "medium",
+                    "timestamp": time.time(),
+                }
+            )
 
         if triggered:
             for alarm in triggered:

@@ -48,8 +48,8 @@ class DisplayUnit(sg.Column):
             self.title_label.update(text_color="orange")
             self.value_label.update(text_color="orange")
         elif criticality == "high":
-            self.title_label.update(text_color="red")
-            self.value_label.update(text_color="red")
+            self.title_label.update(text_color="IndianRed1")
+            self.value_label.update(text_color="IndianRed1")
 
 
 class MonitorBar(sg.Column):
@@ -72,7 +72,10 @@ class MonitorBar(sg.Column):
 
         # Buttons
         self.lock_btn = sg.Button(
-            "Bloquear", size=(9, 2), key=events.LOCK_SCREEN_BUTTON_OPER
+            "Bloquear",
+            size=(9, 2),
+            font=("Helvetica", 12),
+            key=events.LOCK_SCREEN_BUTTON_OPER,
         )
 
         # Misc
