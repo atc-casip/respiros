@@ -18,6 +18,8 @@ class OperationView(View):
 
     __first = True
 
+    __locked = False
+
     timestamp_old = 0.0
     pressure_old = 0.0
     airflow_old = 0.0
@@ -89,6 +91,24 @@ class OperationView(View):
                 self.topbar.freq.show_alarm(values[event]["criticality"])
         elif event == events.ZMQ_OPER_MODE:
             self.control_pane.mode_label.update(values[event]["mode"].upper())
+            # TODO: Change sliders depending on the current mode
+        elif event == events.LOCK_SCREEN_BUTTON_OPER:
+            if not self.__locked:
+                self.__locked = True
+
+                self.topbar.lock_btn.update("Desbloquear")
+
+                self.control_pane.parameters.lock()
+                self.control_pane.alarms.lock()
+                self.control_pane.history.lock()
+            else:
+                self.__locked = False
+
+                self.topbar.lock_btn.update("Bloquear")
+
+                self.control_pane.parameters.unlock()
+                self.control_pane.alarms.unlock()
+                self.control_pane.history.unlock()
 
         self.control_pane.handle_event(event, values)
 

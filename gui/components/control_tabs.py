@@ -28,6 +28,14 @@ class ControlTab(sg.Column, metaclass=ABCMeta):
         super().update(visible=False)
 
     @abstractmethod
+    def lock(self):
+        return
+
+    @abstractmethod
+    def unlock(self):
+        return
+
+    @abstractmethod
     def handle_event(self, event: str, values: Dict):
         """Perform the appropiate logic in response to an event.
 
@@ -113,6 +121,20 @@ class ParametersTab(ControlTab):
         self.ie.expand()
 
         super().show()
+
+    def lock(self):
+        self.ipap.slider.update(disabled=True)
+        self.epap.slider.update(disabled=True)
+        self.freq.slider.update(disabled=True)
+        self.trigger.slider.update(disabled=True)
+        self.ie.slider.update(disabled=True)
+
+    def unlock(self):
+        self.ipap.slider.update(disabled=False)
+        self.epap.slider.update(disabled=False)
+        self.freq.slider.update(disabled=False)
+        self.trigger.slider.update(disabled=False)
+        self.ie.slider.update(disabled=False)
 
     def handle_event(self, event: str, values: Dict):
         change = False
@@ -283,6 +305,26 @@ class AlarmsTab(ControlTab):
 
         super().show()
 
+    def lock(self):
+        self.pressure_min.slider.update(disabled=True)
+        self.pressure_max.slider.update(disabled=True)
+        self.volume_min.slider.update(disabled=True)
+        self.volume_max.slider.update(disabled=True)
+        self.oxygen_min.slider.update(disabled=True)
+        self.oxygen_max.slider.update(disabled=True)
+        self.freq_max.slider.update(disabled=True)
+        self.commit_btn.update(disabled=True)
+
+    def unlock(self):
+        self.pressure_min.slider.update(disabled=False)
+        self.pressure_max.slider.update(disabled=False)
+        self.volume_min.slider.update(disabled=False)
+        self.volume_max.slider.update(disabled=False)
+        self.oxygen_min.slider.update(disabled=False)
+        self.oxygen_max.slider.update(disabled=False)
+        self.freq_max.slider.update(disabled=False)
+        self.commit_btn.update(disabled=False)
+
     def handle_event(self, event: str, values: Dict):
         if event == events.PRESSURE_MIN_SLIDER_OPER:
             self.pressure_min.value = ctx.pressure_min = int(values[event])
@@ -342,6 +384,12 @@ class HistoryTab(ControlTab):
         self.silence_btn.expand(expand_x=True)
 
         super().show()
+
+    def lock(self):
+        self.silence_btn.update(disabled=True)
+
+    def unlock(self):
+        self.silence_btn.update(disabled=False)
 
     def handle_event(self, event: str, values: Dict):
         return

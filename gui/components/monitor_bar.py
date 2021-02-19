@@ -71,7 +71,7 @@ class MonitorBar(sg.Column):
         )
 
         # Buttons
-        self.lock_btn = sg.RealtimeButton(
+        self.lock_btn = sg.Button(
             "Bloquear", size=(9, 2), key=events.LOCK_SCREEN_BUTTON_OPER
         )
 

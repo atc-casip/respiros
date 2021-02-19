@@ -49,7 +49,7 @@ class App(sg.Window):
         threading.Thread(target=self.check_ipc, daemon=True).start()
 
         while True:
-            event, values = super().read(timeout=10)
+            event, values = super().read()
             self.__current_view.handle_event(event, values)
 
     def check_ipc(self):
