@@ -74,7 +74,15 @@ class AnalogSensor:
 
         self.adc = adc
         self.channel = channel
-        self.func = func
+        self.__func = func
+
+    @property
+    def func(self) -> Callable[[float], float]:
+        return self.__func
+
+    @func.setter
+    def func(self, f):
+        self.__func = f
 
     def read(self) -> float:
         """

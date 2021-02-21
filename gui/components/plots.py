@@ -52,7 +52,7 @@ class PlotCanvas(sg.Canvas):
             self.fig.set_figwidth(8)
 
             # Configure pressure subplot
-            self.ax_pressure.set_title("PRESION")
+            self.ax_pressure.set_title("PRESIÓN")
             self.ax_pressure.set_ylabel("cmH\N{SUBSCRIPT TWO}O")
             self.ax_pressure.set_xlim(0, self.nsamples)
             self.ax_pressure.set_ylim(-2, 35)

@@ -63,7 +63,7 @@ class MonitorBar(sg.Column):
         self.epap = DisplayUnit(
             "EPAP", "cmH\N{SUBSCRIPT TWO}O", 10, FONT_SIZE_BIG
         )
-        self.freq = DisplayUnit("Frecuencia", "rpm", 7, FONT_SIZE_BIG)
+        self.freq = DisplayUnit("Frecuencia", "rpm", 8, FONT_SIZE_BIG)
         self.vc_in = DisplayUnit("V (in)", "ml", 5, FONT_SIZE_SMALL)
         self.vc_out = DisplayUnit("V (out)", "ml", 5, FONT_SIZE_SMALL)
         self.oxygen = DisplayUnit(

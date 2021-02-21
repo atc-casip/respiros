@@ -32,6 +32,7 @@ class TestOxygen:
 class TestGauge:
 
     counter = 0
+    func = None
 
     def read(self):
         value = pressure[self.counter]
@@ -44,6 +45,7 @@ class TestGauge:
 class TestAirflow:
 
     counter = 0
+    func = None
 
     def read(self):
         value = flux[self.counter]
