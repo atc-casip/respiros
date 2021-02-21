@@ -2,15 +2,17 @@
 Main operation modes.
 """
 
-from controls.messenger import Messenger
 import logging
 import time
 from typing import Dict
 
+import common.alarms as alarms
+import common.ipc.topics as topics
 import numpy as np
 import zmq
 from controls.config import cfg
 from controls.context import Context
+from controls.messenger import Messenger
 
 from .events import Event, StartOperationAssisted, StartOperationControlled
 from .state import State
@@ -126,9 +128,9 @@ class OperationControlled(State):
             # update class attributes
             try:
                 [topic, msg] = self.ctx.messenger.recv(block=False)
-                if topic == "request-reading":
+                if topic == topics.REQUEST_READING:
                     self.ctx.messenger.send(
-                        "reading",
+                        topics.READING,
                         {
                             "pressure": self.gauge_pressure_filtered,
                             "airflow": self.airflow_pressure_filtered,
@@ -137,7 +139,7 @@ class OperationControlled(State):
                         },
                     )
 
-                if topic == "operation":
+                if topic == topics.OPERATION_PARAMS:
                     logging.info("Received new operation parameters")
 
                     self.ipap = msg["ipap"]
@@ -147,7 +149,7 @@ class OperationControlled(State):
                     self.exhale = msg["exhale"]
                     self.__get_ie_durations()
 
-                if topic == "change-alarms":
+                if topic == topics.OPERATION_ALARMS:
                     logging.info("Received new alarm ranges")
 
                     self.pressure_min = msg["pressure_min"]
@@ -367,7 +369,7 @@ class OperationControlled(State):
         ) * self.freq_mean + (1 / MEAN_FREQ_LENGTH) * self.freq_read
 
         self.ctx.messenger.send(
-            "cycle",
+            topics.CYCLE,
             {
                 "ipap": self.ipap_read,
                 "epap": self.epap_read,
@@ -491,13 +493,25 @@ class OperationControlled(State):
         triggered = []
 
         if self.epap_read < self.pressure_min:
-            triggered.append({"type": "pressure_min", "criticality": "medium"})
+            triggered.append(
+                {
+                    "type": alarms.PRESSURE_MIN,
+                    "criticality": "medium",
+                    "timestamp": time.time(),
+                }
+            )
         elif self.ipap_read > self.pressure_max:
-            triggered.append({"type": "pressure_max", "criticality": "medium"})
+            triggered.append(
+                {
+                    "type": alarms.PRESSURE_MAX,
+                    "criticality": "medium",
+                    "timestamp": time.time(),
+                }
+            )
 
         if triggered:
             for alarm in triggered:
-                msg.send("alarm", alarm)
+                msg.send(topics.ALARM, alarm)
 
 
 class OperationAssisted(State):

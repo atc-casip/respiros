@@ -72,8 +72,8 @@ class AnalogSensor:
         the function used to convert the voltage to the actual reading.
         """
 
-        self.adc = adc
-        self.channel = channel
+        self.__adc = adc
+        self.__channel = channel
         self.__func = func
 
     @property
@@ -89,5 +89,5 @@ class AnalogSensor:
         Trigger a new reading of the sensor.
         """
 
-        voltage = self.adc.read(self.channel)
-        return self.func(voltage)
+        voltage = self.__adc.read(self.__channel)
+        return self.__func(voltage)

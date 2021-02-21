@@ -1,17 +1,26 @@
 import datetime
+
+import common.alarms as alarms
+import gui.style as style
 import PySimpleGUI as sg
 
 
 class AlarmCard(sg.Column):
     def __init__(self, last: bool = False):
         self.timestamp_label = sg.Text(
-            "", size=(13, 1), font=("Helvetica", 18)
+            "",
+            size=(13, 1),
+            font=(style.FONT_FAMILY, style.FONT_SIZE_MEDIUM),
         )
-        self.type_label = sg.Text("", size=(15, 1), font=("Helvetica", 18))
+        self.type_label = sg.Text(
+            "",
+            size=(15, 1),
+            font=(style.FONT_FAMILY, style.FONT_SIZE_MEDIUM),
+        )
         self.priority_label = sg.Text(
             "",
             size=(10, 1),
-            font=("Helvetica", 18, "bold"),
+            font=(style.FONT_FAMILY, style.FONT_SIZE_MEDIUM, "bold"),
             justification="right",
         )
 
@@ -33,20 +42,24 @@ class AlarmCard(sg.Column):
         self, type: str, criticality: str, timestamp: datetime.datetime
     ):
         text = ""
-        if type == "pressure_min":
+        if type == alarms.PRESSURE_MIN:
             text = "Presión baja"
-        elif type == "pressure_max":
+        elif type == alarms.PRESSURE_MAX:
             text = "Presión alta"
-        elif type == "volume_min":
+        elif type == alarms.VOLUME_MIN:
             text = "Volumen bajo"
-        elif type == "volume_max":
+        elif type == alarms.VOLUME_MAX:
             text = "Volumen alto"
-        elif type == "oxygen_min":
+        elif type == alarms.OXYGEN_MIN:
             text = "Oxígeno bajo"
-        elif type == "oxygen_max":
+        elif type == alarms.OXYGEN_MAX:
             text = "Oxígeno alto"
-        elif type == "freq_max":
+        elif type == alarms.FREQ_MAX:
             text = "Frecuencia alta"
+        elif type == alarms.APNEA:
+            text = "Apnea"
+        elif type == alarms.DISCONNECTION:
+            text = "Desconexión"
 
         self.timestamp_label.update(timestamp.strftime("%d/%m %H:%M:%S"))
         self.type_label.update(text)

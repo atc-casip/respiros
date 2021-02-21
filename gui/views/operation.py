@@ -1,6 +1,8 @@
 import logging
 from typing import Dict
 
+import common.alarms as alarms
+import common.ipc.topics as topics
 import gui.events as events
 from gui.components import ControlPane, MonitorBar, PlotCanvas
 from gui.context import Alarm, ctx
@@ -54,7 +56,7 @@ class OperationView(View):
 
     def handle_event(self, event: str, values: Dict):
         if self.__first:
-            msg.send("request-reading", {})
+            msg.send(topics.REQUEST_READING, {})
             self.__first = False
 
         if event == events.ZMQ_READING:
@@ -62,7 +64,7 @@ class OperationView(View):
             self.canvas.update_plots(
                 ctx.pressure_data, ctx.airflow_data, ctx.volume_data
             )
-            msg.send("request-reading", {})
+            msg.send(topics.REQUEST_READING, {})
         elif event == events.ZMQ_CYCLE:
             self.topbar.ipap.value = values[event]["ipap"]
             self.topbar.epap.value = values[event]["epap"]
@@ -83,17 +85,17 @@ class OperationView(View):
                 float(values[event]["timestamp"]),
             )
 
-            if alarm.type == "pressure_min":
+            if alarm.type == alarms.PRESSURE_MIN:
                 self.topbar.epap.show_alarm(alarm.criticality)
-            elif alarm.type == "pressure_max":
+            elif alarm.type == alarms.PRESSURE_MAX:
                 self.topbar.ipap.show_alarm(alarm.criticality)
-            elif alarm.type == "volume_min":
+            elif alarm.type == alarms.VOLUME_MIN:
                 pass
-            elif alarm.type == "volume_max":
+            elif alarm.type == alarms.VOLUME_MAX:
                 pass
-            elif alarm.type in {"oxygen_min", "oxygen_max"}:
+            elif alarm.type in {alarms.OXYGEN_MIN, alarms.OXYGEN_MAX}:
                 self.topbar.oxygen.show_alarm(alarm.criticality)
-            elif alarm.type == "freq_max":
+            elif alarm.type == alarms.FREQ_MAX:
                 self.topbar.freq.show_alarm(alarm.criticality)
 
             if alarm.criticality != "none":

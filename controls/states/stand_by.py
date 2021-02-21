@@ -7,7 +7,9 @@ import logging
 import time
 from typing import Dict
 
+import common.ipc.topics as topics
 import zmq
+
 from .events import Event, StartOperationControlled
 from .operation import OperationControlled
 from .state import State
@@ -46,7 +48,7 @@ class StandBy(State):
 
             try:
                 [topic, msg] = self.ctx.messenger.recv(block=False)
-                if topic == "operation":
+                if topic == topics.OPERATION_PARAMS:
                     logging.info("Time: %f", time.time() - time_saved)
                     # Airflow and gauge continue calibration
                     while time.time() < time_saved + time_start:

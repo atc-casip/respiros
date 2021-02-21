@@ -1,0 +1,11 @@
+"""Alarm types."""
+
+PRESSURE_MIN = "pressure-min"
+PRESSURE_MAX = "pressure-max"
+VOLUME_MIN = "volume-min"
+VOLUME_MAX = "volume-max"
+OXYGEN_MIN = "oxygen-min"
+OXYGEN_MAX = "oxygen-max"
+FREQ_MAX = "freq-max"
+APNEA = "apnea"
+DISCONNECTION = "disconnection"

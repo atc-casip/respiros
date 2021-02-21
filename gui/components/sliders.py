@@ -1,9 +1,7 @@
 from typing import Tuple, Union
 
+import gui.style as style
 import PySimpleGUI as sg
-
-FONT_FAMILY = "Helvetica"
-FONT_SIZE = 15
 
 
 class NumericSlider(sg.Column):
@@ -19,13 +17,19 @@ class NumericSlider(sg.Column):
     ):
         self.__value = default_value
 
-        self.title_label = sg.Text(label, font=(FONT_FAMILY, FONT_SIZE))
-        self.metric_label = sg.Text(metric, font=(FONT_FAMILY, FONT_SIZE))
+        self.title_label = sg.Text(
+            label,
+            font=(style.FONT_FAMILY, style.FONT_SIZE_MEDIUM),
+        )
+        self.metric_label = sg.Text(
+            metric,
+            font=(style.FONT_FAMILY, style.FONT_SIZE_MEDIUM),
+        )
         self.value_label = sg.Text(
             default_value,
             size=(5, 1),
             justification="right",
-            font=(FONT_FAMILY, FONT_SIZE),
+            font=(style.FONT_FAMILY, style.FONT_SIZE_MEDIUM),
         )
         self.slider = sg.Slider(
             range=values,
@@ -73,13 +77,14 @@ class IESlider(sg.Column):
         self.__value = self.__ie_to_int(default_value)
 
         self.title_label = sg.Text(
-            "Relación I:E", font=(FONT_FAMILY, FONT_SIZE)
+            "Relación I:E",
+            font=(style.FONT_FAMILY, style.FONT_SIZE_MEDIUM),
         )
         self.value_label = sg.Text(
             f"{default_value[0]}:{default_value[1]}",
             size=(5, 1),
             justification="right",
-            font=(FONT_FAMILY, FONT_SIZE),
+            font=(style.FONT_FAMILY, style.FONT_SIZE_MEDIUM),
         )
         self.slider = sg.Slider(
             range=((inhale_max - 1) * -1, exhale_max - 1),

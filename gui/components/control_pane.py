@@ -1,11 +1,9 @@
 from typing import Dict
 
+import gui.style as style
 import PySimpleGUI as sg
 
 from .control_tabs import AlarmsTab, ControlTab, HistoryTab, ParametersTab
-
-FONT_FAMILY = "Helvetica"
-FONT_SIZE = 20
 
 
 class ControlPane(sg.Column):
@@ -19,26 +17,30 @@ class ControlPane(sg.Column):
 
         # Labels
         self.tab_label = sg.Text(
-            self.__current_tab.title, font=(FONT_FAMILY, FONT_SIZE)
+            self.__current_tab.title,
+            font=(style.FONT_FAMILY, style.FONT_SIZE_BIG),
         )
-        self.mode_label = sg.Text("VCP", font=(FONT_FAMILY, FONT_SIZE))
+        self.mode_label = sg.Text(
+            "VCP",
+            font=(style.FONT_FAMILY, style.FONT_SIZE_BIG),
+        )
 
         # Buttons
         self.parameters_btn = sg.Button(
             self.parameters.title,
             size=(10, 2),
-            font=("Helvetica", 12),
+            font=(style.FONT_FAMILY, style.FONT_SIZE_SMALL),
             disabled=True,
         )
         self.alarms_btn = sg.Button(
             self.alarms.title,
             size=(10, 2),
-            font=("Helvetica", 12),
+            font=(style.FONT_FAMILY, style.FONT_SIZE_SMALL),
         )
         self.history_btn = sg.Button(
             self.history.title,
             size=(10, 2),
-            font=("Helvetica", 12),
+            font=(style.FONT_FAMILY, style.FONT_SIZE_SMALL),
         )
 
         # Misc

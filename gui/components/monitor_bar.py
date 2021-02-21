@@ -1,11 +1,6 @@
-import PySimpleGUI as sg
-
 import gui.events as events
-
-FONT_FAMILY = "Helvetica"
-FONT_SIZE_BIG = 20
-FONT_SIZE_SMALL = 12
-FONT_STYLE = "bold"
+import gui.style as style
+import PySimpleGUI as sg
 
 
 class DisplayUnit(sg.Column):
@@ -14,11 +9,11 @@ class DisplayUnit(sg.Column):
         self.__metric = metric
 
         self.title_label = sg.Text(
-            f"{title}:", font=(FONT_FAMILY, font_size, FONT_STYLE)
+            f"{title}:", font=(style.FONT_FAMILY, font_size, "bold")
         )
         self.value_label = sg.Text(
             f"-   {self.__metric}",
-            font=(FONT_FAMILY, font_size, FONT_STYLE),
+            font=(style.FONT_FAMILY, font_size, "bold"),
             size=(size, 1),
             justification="right",
         )
@@ -58,23 +53,23 @@ class MonitorBar(sg.Column):
     def __init__(self):
         # Displays
         self.ipap = DisplayUnit(
-            "IPAP", "cmH\N{SUBSCRIPT TWO}O", 10, FONT_SIZE_BIG
+            "IPAP", "cmH\N{SUBSCRIPT TWO}O", 10, style.FONT_SIZE_BIG
         )
         self.epap = DisplayUnit(
-            "EPAP", "cmH\N{SUBSCRIPT TWO}O", 10, FONT_SIZE_BIG
+            "EPAP", "cmH\N{SUBSCRIPT TWO}O", 10, style.FONT_SIZE_BIG
         )
-        self.freq = DisplayUnit("Frecuencia", "rpm", 8, FONT_SIZE_BIG)
-        self.vc_in = DisplayUnit("V (in)", "ml", 5, FONT_SIZE_SMALL)
-        self.vc_out = DisplayUnit("V (out)", "ml", 5, FONT_SIZE_SMALL)
+        self.freq = DisplayUnit("Frecuencia", "rpm", 8, style.FONT_SIZE_BIG)
+        self.vc_in = DisplayUnit("V (in)", "ml", 5, style.FONT_SIZE_SMALL)
+        self.vc_out = DisplayUnit("V (out)", "ml", 5, style.FONT_SIZE_SMALL)
         self.oxygen = DisplayUnit(
-            "O\N{SUBSCRIPT TWO}", "%", 4, FONT_SIZE_SMALL
+            "O\N{SUBSCRIPT TWO}", "%", 4, style.FONT_SIZE_SMALL
         )
 
         # Buttons
         self.lock_btn = sg.Button(
             "Bloquear",
             size=(9, 2),
-            font=("Helvetica", 12),
+            font=(style.FONT_FAMILY, style.FONT_SIZE_SMALL),
             key=events.LOCK_SCREEN_BUTTON_OPER,
         )
 

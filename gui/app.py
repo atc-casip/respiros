@@ -1,8 +1,10 @@
 import threading
 
+import common.ipc.topics as topics
 import PySimpleGUI as sg
 
 import gui.events as events
+import gui.style as style
 import gui.views as views
 from gui.messenger import msg
 
@@ -15,7 +17,7 @@ class App(sg.Window):
     """
 
     def __init__(self, initial_view=views.LoadingView):
-        sg.theme("Black")
+        sg.theme(style.THEME)
 
         super().__init__("RespirOS", size=(1366, 768), margins=(10, 10))
 
@@ -62,13 +64,13 @@ class App(sg.Window):
 
         while True:
             topic, body = msg.recv()
-            if topic == "check":
+            if topic == topics.CHECK:
                 super().write_event_value(events.ZMQ_CHECK, body)
-            elif topic == "reading":
+            elif topic == topics.READING:
                 super().write_event_value(events.ZMQ_READING, body)
-            elif topic == "cycle":
+            elif topic == topics.CYCLE:
                 super().write_event_value(events.ZMQ_CYCLE, body)
-            elif topic == "alarm":
+            elif topic == topics.ALARM:
                 super().write_event_value(events.ZMQ_ALARM, body)
-            elif topic == "operation-mode":
+            elif topic == topics.OPERATION_MODE:
                 super().write_event_value(events.ZMQ_OPER_MODE, body)

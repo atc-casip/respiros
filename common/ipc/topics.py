@@ -1,0 +1,11 @@
+"""Topics used by ZeroMQ messages to identify their contents."""
+
+CHECK = "check"
+OPERATION_MODE = "operation-mode"
+OPERATION_PARAMS = "operation-params"
+OPERATION_ALARMS = "operation-alarms"
+ALARM = "alarm"
+SILENCE_ALARMS = "silence-alarms"
+REQUEST_READING = "request-reading"
+READING = "reading"
+CYCLE = "cycle"

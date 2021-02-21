@@ -6,6 +6,8 @@ import logging
 import time
 from typing import Dict, Tuple
 
+import common.ipc.topics as topics
+
 from .events import ChecksSuccessful, ChecksUnsuccessful, Event
 from .failure import Failure
 from .stand_by import StandBy
@@ -73,7 +75,7 @@ class SelfCheck(State):
         time.sleep(2)
 
         self.ctx.messenger.send(
-            "check",
+            topics.CHECK,
             {
                 "dht_box": dht_box_ok,
                 "dht_air": dht_air_ok,

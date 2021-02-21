@@ -1,9 +1,11 @@
 from abc import ABCMeta, abstractmethod
-from gui.components.alarm_card import AlarmCard
 from typing import Dict
 
+import common.ipc.topics as topics
 import gui.events as events
+import gui.style as style
 import PySimpleGUI as sg
+from gui.components.alarm_card import AlarmCard
 from gui.config import cfg
 from gui.context import ctx
 from gui.messenger import msg
@@ -163,7 +165,7 @@ class ParametersTab(ControlTab):
 
         if change:
             msg.send(
-                "operation",
+                topics.OPERATION_PARAMS,
                 {
                     "ipap": ctx.ipap,
                     "epap": ctx.epap,
@@ -255,27 +257,29 @@ class AlarmsTab(ControlTab):
         self.pressure_frame = sg.Frame(
             "Presión",
             [[self.pressure_min, self.pressure_max]],
-            font=("Helvetica", 15),
+            font=(style.FONT_FAMILY, style.FONT_SIZE_MEDIUM),
         )
         self.volume_frame = sg.Frame(
             "Volumen",
             [[self.volume_min, self.volume_max]],
-            font=("Helvetica", 15),
+            font=(style.FONT_FAMILY, style.FONT_SIZE_MEDIUM),
         )
         self.oxygen_frame = sg.Frame(
             "Oxígeno",
             [[self.oxygen_min, self.oxygen_max]],
-            font=("Helvetica", 15),
+            font=(style.FONT_FAMILY, style.FONT_SIZE_MEDIUM),
         )
         self.freq_frame = sg.Frame(
-            "Frecuencia", [[self.freq_max]], font=("Helvetica", 15)
+            "Frecuencia",
+            [[self.freq_max]],
+            font=(style.FONT_FAMILY, style.FONT_SIZE_MEDIUM),
         )
 
         # Buttons
         self.commit_btn = sg.Button(
             "Aplicar",
             size=(10, 2),
-            font=("Helvetica", 12),
+            font=(style.FONT_FAMILY, style.FONT_SIZE_SMALL),
             key=events.APPLY_ALARMS_BUTTON_OPER,
         )
 
@@ -358,7 +362,7 @@ class AlarmsTab(ControlTab):
             self.freq_max.value = ctx.freq_max = int(values[event])
         elif event == events.APPLY_ALARMS_BUTTON_OPER:
             msg.send(
-                "change-alarms",
+                topics.OPERATION_ALARMS,
                 {
                     "pressure_min": ctx.pressure_min,
                     "pressure_max": ctx.pressure_max,
@@ -379,7 +383,8 @@ class HistoryTab(ControlTab):
         self.silence_btn = sg.Button(
             "Silenciar alarmas",
             size=(10, 2),
-            font=("Helvetica", 12),
+            font=(style.FONT_FAMILY, style.FONT_SIZE_SMALL),
+            key=events.SILENCE_ALARMS_BUTTON_OPER,
         )
 
         # Alarm cards
@@ -410,7 +415,8 @@ class HistoryTab(ControlTab):
         self.silence_btn.update(disabled=False)
 
     def handle_event(self, event: str, values: Dict):
-        return
+        if event == events.SILENCE_ALARMS_BUTTON_OPER:
+            msg.send(topics.SILENCE_ALARMS, {})
 
     def refresh_alarms(self):
         for a, c in zip(ctx.alarms, self.alarm_cards):
