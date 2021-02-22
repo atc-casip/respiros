@@ -19,7 +19,6 @@ class OperationView(View):
     """Main monitorization and control view."""
 
     __first = True
-
     __locked = False
 
     timestamp_old = 0.0
@@ -44,12 +43,20 @@ class OperationView(View):
         self.topbar.expand()
         self.control_pane.expand()
 
-        self.control_pane.parameters.ipap.value = ctx.ipap
-        self.control_pane.parameters.epap.value = ctx.epap
-        self.control_pane.parameters.freq.value = ctx.freq
-        self.control_pane.parameters.trigger.value = ctx.trigger
-        self.control_pane.parameters.ie.value = ctx.inhale, ctx.exhale
+        self.control_pane.parameters.ipap_vcp.value = (
+            self.control_pane.parameters.ipap_vps.value
+        ) = ctx.ipap
+        self.control_pane.parameters.epap_vcp.value = (
+            self.control_pane.parameters.epap_vps.value
+        ) = ctx.epap
+        self.control_pane.parameters.freq_vcp.value = ctx.freq
+        self.control_pane.parameters.trigger_vcp.value = (
+            self.control_pane.parameters.trigger_vps.value
+        ) = ctx.trigger
+        self.control_pane.parameters.ie_vcp.value = ctx.inhale, ctx.exhale
 
+        self.control_pane.mode_label.update(ctx.mode.upper())
+        self.control_pane.show_tab(self.control_pane.parameters)
         self.canvas.draw()
 
         super().show()
@@ -104,25 +111,32 @@ class OperationView(View):
                 ctx.alarms.append(alarm)
                 self.control_pane.history.refresh_alarms()
         elif event == events.ZMQ_OPER_MODE:
-            self.control_pane.mode_label.update(values[event]["mode"].upper())
-            # TODO: Change sliders depending on the current mode
+            ctx.mode = values[event]["mode"]
+            self.control_pane.mode_label.update(ctx.mode.upper())
+            self.control_pane.parameters.switch_mode()
         elif event == events.LOCK_SCREEN_BUTTON_OPER:
+            if ctx.mode == "vcp":
+                self.app.write_event_value(
+                    events.ZMQ_OPER_MODE, {"mode": "vps"}
+                )
+            elif ctx.mode == "vps":
+                self.app.write_event_value(
+                    events.ZMQ_OPER_MODE, {"mode": "vcp"}
+                )
+            """
             if not self.__locked:
                 self.__locked = True
-
                 self.topbar.lock_btn.update("Desbloquear")
-
                 self.control_pane.parameters.lock()
                 self.control_pane.alarms.lock()
                 self.control_pane.history.lock()
             else:
                 self.__locked = False
-
                 self.topbar.lock_btn.update("Bloquear")
-
                 self.control_pane.parameters.unlock()
                 self.control_pane.alarms.unlock()
                 self.control_pane.history.unlock()
+            """
 
         self.control_pane.handle_event(event, values)
 

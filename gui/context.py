@@ -26,6 +26,7 @@ class Context:
         self.trigger = cfg["params"]["trigger"]["default"]
         self.inhale = cfg["params"]["inhale"]["default"]
         self.exhale = cfg["params"]["exhale"]["default"]
+        self.mode = "vcp"
 
         # Plotting data
         self.pressure_data = []

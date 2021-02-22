@@ -10,19 +10,21 @@ class ControlPane(sg.Column):
     """Pane with tabs for system control."""
 
     def __init__(self):
+        self.__current_tab = None
         # Tabs
-        self.parameters = self.__current_tab = ParametersTab()
+        self.parameters = ParametersTab()
         self.alarms = AlarmsTab()
         self.history = HistoryTab()
 
         # Labels
         self.tab_label = sg.Text(
-            self.__current_tab.title,
+            size=(10, 1),
             font=(style.FONT_FAMILY, style.FONT_SIZE_BIG),
         )
         self.mode_label = sg.Text(
-            "VCP",
+            size=(5, 1),
             font=(style.FONT_FAMILY, style.FONT_SIZE_BIG),
+            justification="right",
         )
 
         # Buttons
@@ -30,7 +32,6 @@ class ControlPane(sg.Column):
             self.parameters.title,
             size=(10, 2),
             font=(style.FONT_FAMILY, style.FONT_SIZE_SMALL),
-            disabled=True,
         )
         self.alarms_btn = sg.Button(
             self.alarms.title,
@@ -61,13 +62,14 @@ class ControlPane(sg.Column):
             tab (ControlTab): The tab itself.
         """
 
-        self.__current_tab.hide()
-        if isinstance(self.__current_tab, ParametersTab):
-            self.parameters_btn.update(disabled=False)
-        elif isinstance(self.__current_tab, AlarmsTab):
-            self.alarms_btn.update(disabled=False)
-        elif isinstance(self.__current_tab, HistoryTab):
-            self.history_btn.update(disabled=False)
+        if self.__current_tab:
+            self.__current_tab.hide()
+            if isinstance(self.__current_tab, ParametersTab):
+                self.parameters_btn.update(disabled=False)
+            elif isinstance(self.__current_tab, AlarmsTab):
+                self.alarms_btn.update(disabled=False)
+            elif isinstance(self.__current_tab, HistoryTab):
+                self.history_btn.update(disabled=False)
 
         self.__current_tab = tab
 
@@ -87,8 +89,6 @@ class ControlPane(sg.Column):
         self.parameters_btn.expand(expand_x=True, expand_row=False)
         self.alarms_btn.expand(expand_x=True, expand_row=False)
         self.history_btn.expand(expand_x=True, expand_row=False)
-
-        self.__current_tab.show()
 
     def handle_event(self, event: str, values: Dict):
         """React to the event provided by the event loop.

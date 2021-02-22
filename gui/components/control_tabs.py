@@ -53,8 +53,8 @@ class ParametersTab(ControlTab):
     """Tab for operation control."""
 
     def __init__(self):
-        # Sliders
-        self.ipap = NumericSlider(
+        # VCP
+        self.ipap_vcp = NumericSlider(
             "Presión IPAP",
             metric="cmH\N{SUBSCRIPT TWO}O",
             values=(
@@ -62,9 +62,9 @@ class ParametersTab(ControlTab):
                 cfg["params"]["ipap"]["max"],
             ),
             default_value=cfg["params"]["ipap"]["default"],
-            key=events.IPAP_SLIDER_OPER,
+            key=events.IPAP_SLIDER_OPER_VCP,
         )
-        self.epap = NumericSlider(
+        self.epap_vcp = NumericSlider(
             "Presión EPAP",
             metric="cmH\N{SUBSCRIPT TWO}O",
             values=(
@@ -72,9 +72,9 @@ class ParametersTab(ControlTab):
                 cfg["params"]["epap"]["max"],
             ),
             default_value=cfg["params"]["epap"]["default"],
-            key=events.EPAP_SLIDER_OPER,
+            key=events.EPAP_SLIDER_OPER_VCP,
         )
-        self.freq = NumericSlider(
+        self.freq_vcp = NumericSlider(
             "Frecuencia",
             metric="rpm",
             values=(
@@ -82,9 +82,9 @@ class ParametersTab(ControlTab):
                 cfg["params"]["freq"]["max"],
             ),
             default_value=cfg["params"]["freq"]["default"],
-            key=events.FREQ_SLIDER_OPER,
+            key=events.FREQ_SLIDER_OPER_VCP,
         )
-        self.trigger = NumericSlider(
+        self.trigger_vcp = NumericSlider(
             "Trigger de flujo",
             metric="ml",
             values=(
@@ -92,37 +92,96 @@ class ParametersTab(ControlTab):
                 cfg["params"]["trigger"]["max"],
             ),
             default_value=cfg["params"]["trigger"]["default"],
-            key=events.TRIGGER_SLIDER_OPER,
+            key=events.TRIGGER_SLIDER_OPER_VCP,
         )
-        self.ie = IESlider(
+        self.ie_vcp = IESlider(
             inhale_max=cfg["params"]["inhale"]["max"],
             exhale_max=cfg["params"]["exhale"]["max"],
             default_value=(
                 cfg["params"]["inhale"]["default"],
                 cfg["params"]["exhale"]["default"],
             ),
-            key=events.IE_SLIDER_OPER,
+            key=events.IE_SLIDER_OPER_VCP,
+        )
+
+        # VPS
+        self.ipap_vps = NumericSlider(
+            "Presión IPAP",
+            metric="cmH\N{SUBSCRIPT TWO}O",
+            values=(
+                cfg["params"]["ipap"]["min"],
+                cfg["params"]["ipap"]["max"],
+            ),
+            default_value=cfg["params"]["ipap"]["default"],
+            key=events.IPAP_SLIDER_OPER_VPS,
+        )
+        self.epap_vps = NumericSlider(
+            "Presión EPAP",
+            metric="cmH\N{SUBSCRIPT TWO}O",
+            values=(
+                cfg["params"]["epap"]["min"],
+                cfg["params"]["epap"]["max"],
+            ),
+            default_value=cfg["params"]["epap"]["default"],
+            key=events.EPAP_SLIDER_OPER_VPS,
+        )
+        self.trigger_vps = NumericSlider(
+            "Trigger de flujo",
+            metric="ml",
+            values=(
+                cfg["params"]["trigger"]["min"],
+                cfg["params"]["trigger"]["max"],
+            ),
+            default_value=cfg["params"]["trigger"]["default"],
+            key=events.TRIGGER_SLIDER_OPER_VPS,
+        )
+
+        # Tabs
+        self.vcp_tab = sg.Column(
+            [
+                [self.ipap_vcp],
+                [self.epap_vcp],
+                [self.freq_vcp],
+                [self.trigger_vcp],
+                [self.ie_vcp],
+            ],
+            visible=False,
+        )
+        self.vps_tab = sg.Column(
+            [
+                [self.ipap_vps],
+                [self.epap_vps],
+                [self.trigger_vps],
+            ],
+            visible=False,
         )
 
         super().__init__(
             "Parámetros",
-            [
-                [self.ipap],
-                [self.epap],
-                [self.freq],
-                [self.trigger],
-                [self.ie],
-            ],
+            [[self.vcp_tab, self.vps_tab]],
         )
+
+    def switch_mode(self):
+        if ctx.mode == "vcp":
+            self.vps_tab.update(visible=False)
+
+            self.vcp_tab.expand(expand_x=True, expand_y=True)
+            self.ipap_vcp.expand()
+            self.epap_vcp.expand()
+            self.freq_vcp.expand()
+            self.trigger_vcp.expand()
+            self.ie_vcp.expand()
+        elif ctx.mode == "vps":
+            self.vcp_tab.update(visible=False)
+
+            self.vps_tab.expand(expand_x=True, expand_y=True)
+            self.ipap_vps.expand()
+            self.epap_vps.expand()
+            self.trigger_vps.expand()
 
     def show(self):
         super().expand(expand_x=True, expand_y=True)
-        self.ipap.expand()
-        self.epap.expand()
-        self.freq.expand()
-        self.trigger.expand()
-        self.ie.expand()
-
+        self.switch_mode()
         super().show()
 
     def lock(self):
@@ -141,24 +200,40 @@ class ParametersTab(ControlTab):
 
     def handle_event(self, event: str, values: Dict):
         change = False
-        if event == events.IPAP_SLIDER_OPER:
-            self.ipap.value = ctx.ipap = int(values[event])
+        if event in {events.IPAP_SLIDER_OPER_VCP, events.IPAP_SLIDER_OPER_VPS}:
+            self.ipap_vcp.value = self.ipap_vps.value = ctx.ipap = int(
+                values[event]
+            )
             change = True
-            if self.ipap.value <= self.epap.value:
-                self.epap.value = ctx.epap = self.ipap.value - 1
-        elif event == events.EPAP_SLIDER_OPER:
-            self.epap.value = ctx.epap = int(values[event])
+            if ctx.ipap <= ctx.epap:
+                self.epap_vcp.value = self.epap_vps.value = ctx.epap = (
+                    ctx.ipap - 1
+                )
+        elif event in {
+            events.EPAP_SLIDER_OPER_VCP,
+            events.EPAP_SLIDER_OPER_VPS,
+        }:
+            self.epap_vcp.value = self.epap_vps.value = ctx.epap = int(
+                values[event]
+            )
             change = True
-            if self.epap.value >= self.ipap.value:
-                self.ipap.value = ctx.ipap = self.epap.value + 1
-        elif event == events.FREQ_SLIDER_OPER:
-            self.freq.value = ctx.freq = int(values[event])
+            if ctx.epap >= ctx.ipap:
+                self.ipap_vcp.value = self.ipap_vps.value = ctx.ipap = (
+                    ctx.epap + 1
+                )
+        elif event == events.FREQ_SLIDER_OPER_VCP:
+            self.freq_vcp.value = ctx.freq = int(values[event])
             change = True
-        elif event == events.TRIGGER_SLIDER_OPER:
-            self.trigger.value = ctx.trigger = int(values[event])
+        elif event in {
+            events.TRIGGER_SLIDER_OPER_VCP,
+            events.TRIGGER_SLIDER_OPER_VPS,
+        }:
+            self.trigger_vcp.value = (
+                self.trigger_vps.value
+            ) = ctx.trigger = int(values[event])
             change = True
-        elif event == events.IE_SLIDER_OPER:
-            self.ie.value = int(values[event])
+        elif event == events.IE_SLIDER_OPER_VCP:
+            self.ie_vcp.value = int(values[event])
             ctx.inhale = self.ie.value[0]
             ctx.exhale = self.ie.value[1]
             change = True
