@@ -6,13 +6,12 @@ import logging
 import time
 from typing import Dict
 
-import common.alarms as alarms
-import common.ipc.topics as topics
 import numpy as np
 import zmq
+from common.alarms import Alarm, Criticality, Type
+from common.ipc import Publisher, Topic
 from controls.config import cfg
 from controls.context import Context
-from controls.messenger import Messenger
 
 from .events import Event, StartOperationAssisted, StartOperationControlled
 from .state import State
@@ -127,10 +126,10 @@ class OperationControlled(State):
             # GUI control actions: check if any message has been received and
             # update class attributes
             try:
-                [topic, msg] = self.ctx.messenger.recv(block=False)
-                if topic == topics.REQUEST_READING:
-                    self.ctx.messenger.send(
-                        topics.READING,
+                [topic, msg] = self.ctx.sub.recv(block=False)
+                if topic == Topic.REQUEST_READING:
+                    self.ctx.pub.send(
+                        Topic.READING,
                         {
                             "pressure": self.gauge_pressure_filtered,
                             "airflow": self.airflow_pressure_filtered,
@@ -139,7 +138,7 @@ class OperationControlled(State):
                         },
                     )
 
-                if topic == topics.OPERATION_PARAMS:
+                if topic == Topic.OPERATION_PARAMS:
                     logging.info("Received new operation parameters")
 
                     self.ipap = msg["ipap"]
@@ -149,7 +148,7 @@ class OperationControlled(State):
                     self.exhale = msg["exhale"]
                     self.__get_ie_durations()
 
-                if topic == topics.OPERATION_ALARMS:
+                if topic == Topic.OPERATION_ALARMS:
                     logging.info("Received new alarm ranges")
 
                     self.pressure_min = msg["pressure_min"]
@@ -239,7 +238,7 @@ class OperationControlled(State):
                         self.__start_espiration()
                         logging.info("Espiration Assisted")
 
-            ## IE cycling execution: Espiration or Inspiration
+            # IE cycling execution: Espiration or Inspiration
             if insp_exp:  # Espiration
                 self.epap_read = (
                     (MEAN_IEPAP_LENGTH - 1) / MEAN_IEPAP_LENGTH
@@ -368,8 +367,8 @@ class OperationControlled(State):
             (MEAN_FREQ_LENGTH - 1) / MEAN_FREQ_LENGTH
         ) * self.freq_mean + (1 / MEAN_FREQ_LENGTH) * self.freq_read
 
-        self.ctx.messenger.send(
-            topics.CYCLE,
+        self.ctx.pub.send(
+            Topic.CYCLE,
             {
                 "ipap": self.ipap_read,
                 "epap": self.epap_read,
@@ -483,7 +482,7 @@ class OperationControlled(State):
 
             self.dht_time_saved = time_now
 
-    def __check_alarms(self, msg: Messenger):
+    def __check_alarms(self, pub: Publisher):
         """Check if any alarms triggered.
 
         Args:
@@ -493,25 +492,13 @@ class OperationControlled(State):
         triggered = []
 
         if self.epap_read < self.pressure_min:
-            triggered.append(
-                {
-                    "type": alarms.PRESSURE_MIN,
-                    "criticality": "medium",
-                    "timestamp": time.time(),
-                }
-            )
+            triggered.append(Alarm(Type.PRESSURE_MIN, Criticality.MEDIUM))
         elif self.ipap_read > self.pressure_max:
-            triggered.append(
-                {
-                    "type": alarms.PRESSURE_MAX,
-                    "criticality": "medium",
-                    "timestamp": time.time(),
-                }
-            )
+            triggered.append(Alarm(Type.PRESSURE_MAX, Criticality.MEDIUM))
 
         if triggered:
             for alarm in triggered:
-                msg.send(topics.ALARM, alarm)
+                pub.send(Topic.ALARM, alarm)
 
 
 class OperationAssisted(State):

@@ -1,6 +1,7 @@
 import gui.events as events
 import gui.style as style
 import PySimpleGUI as sg
+from common.alarms import Criticality
 
 
 class DisplayUnit(sg.Column):
@@ -29,20 +30,20 @@ class DisplayUnit(sg.Column):
         self.__value = round(new_value, 1)
         self.value_label.update(f"{self.__value} {self.__metric}")
 
-    def show_alarm(self, criticality: str):
+    def show_alarm(self, criticality: Criticality):
         """Change the color of the unit to reflect an alarm.
 
         Args:
             criticality (str): Level of criticality.
         """
 
-        if criticality == "none":
+        if criticality == Criticality.NONE:
             self.title_label.update(text_color="white")
             self.value_label.update(text_color="white")
-        elif criticality == "medium":
+        elif criticality == Criticality.MEDIUM:
             self.title_label.update(text_color="orange")
             self.value_label.update(text_color="orange")
-        elif criticality == "high":
+        elif criticality == Criticality.HIGH:
             self.title_label.update(text_color="IndianRed1")
             self.value_label.update(text_color="IndianRed1")
 

@@ -1,12 +1,12 @@
 import logging
 from typing import Dict
 
-import common.alarms as alarms
-import common.ipc.topics as topics
 import gui.events as events
+from common.alarms import Alarm, Criticality, Type
+from common.ipc import Topic
 from gui.components import ControlPane, MonitorBar, PlotCanvas
-from gui.context import Alarm, ctx
-from gui.messenger import msg
+from gui.context import ctx
+from gui.ipc import pub
 
 from .view import View
 
@@ -63,7 +63,7 @@ class OperationView(View):
 
     def handle_event(self, event: str, values: Dict):
         if self.__first:
-            msg.send(topics.REQUEST_READING, {})
+            pub.send(Topic.REQUEST_READING, {})
             self.__first = False
 
         if event == events.ZMQ_READING:
@@ -71,7 +71,7 @@ class OperationView(View):
             self.canvas.update_plots(
                 ctx.pressure_data, ctx.airflow_data, ctx.volume_data
             )
-            msg.send(topics.REQUEST_READING, {})
+            pub.send(Topic.REQUEST_READING, {})
         elif event == events.ZMQ_CYCLE:
             self.topbar.ipap.value = values[event]["ipap"]
             self.topbar.epap.value = values[event]["epap"]
@@ -87,22 +87,22 @@ class OperationView(View):
             )
 
             alarm = Alarm(
-                values[event]["type"],
-                values[event]["criticality"],
+                Type[values[event]["type"]],
+                Criticality[values[event]["criticality"]],
                 float(values[event]["timestamp"]),
             )
 
-            if alarm.type == alarms.PRESSURE_MIN:
+            if alarm.type == Type.PRESSURE_MIN:
                 self.topbar.epap.show_alarm(alarm.criticality)
-            elif alarm.type == alarms.PRESSURE_MAX:
+            elif alarm.type == Type.PRESSURE_MAX:
                 self.topbar.ipap.show_alarm(alarm.criticality)
-            elif alarm.type == alarms.VOLUME_MIN:
+            elif alarm.type == Type.VOLUME_MIN:
                 pass
-            elif alarm.type == alarms.VOLUME_MAX:
+            elif alarm.type == Type.VOLUME_MAX:
                 pass
-            elif alarm.type in {alarms.OXYGEN_MIN, alarms.OXYGEN_MAX}:
+            elif alarm.type in {Type.OXYGEN_MIN, Type.OXYGEN_MAX}:
                 self.topbar.oxygen.show_alarm(alarm.criticality)
-            elif alarm.type == alarms.FREQ_MAX:
+            elif alarm.type == Type.FREQ_MAX:
                 self.topbar.freq.show_alarm(alarm.criticality)
 
             if alarm.criticality != "none":

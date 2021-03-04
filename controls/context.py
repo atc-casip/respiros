@@ -4,8 +4,9 @@ System context.
 
 from dataclasses import dataclass
 
+from common.ipc import Publisher, Subscriber
+
 import controls.pcb as pcb
-from controls.messenger import Messenger
 
 
 @dataclass
@@ -14,7 +15,8 @@ class Context:
     Necessary context for system operation.
     """
 
-    messenger: Messenger
+    pub: Publisher
+    sub: Subscriber
     servo: pcb.Servo
     dht_box: pcb.DHTSensor
     dht_air: pcb.DHTSensor

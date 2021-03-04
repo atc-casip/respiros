@@ -6,7 +6,7 @@ import logging
 import time
 from typing import Dict, Tuple
 
-import common.ipc.topics as topics
+from common.ipc import Topic
 
 from .events import ChecksSuccessful, ChecksUnsuccessful, Event
 from .failure import Failure
@@ -74,8 +74,8 @@ class SelfCheck(State):
         # We need to wait a bit so the GUI application can catch up
         time.sleep(2)
 
-        self.ctx.messenger.send(
-            topics.CHECK,
+        self.ctx.pub.send(
+            Topic.CHECK,
             {
                 "dht_box": dht_box_ok,
                 "dht_air": dht_air_ok,

@@ -1,12 +1,12 @@
 import threading
 
-import common.ipc.topics as topics
 import PySimpleGUI as sg
+from common.ipc import Topic
 
 import gui.events as events
 import gui.style as style
 import gui.views as views
-from gui.messenger import msg
+from gui.ipc import sub
 
 
 class App(sg.Window):
@@ -63,14 +63,14 @@ class App(sg.Window):
         """
 
         while True:
-            topic, body = msg.recv()
-            if topic == topics.CHECK:
+            topic, body = sub.recv()
+            if topic == Topic.CHECK:
                 super().write_event_value(events.ZMQ_CHECK, body)
-            elif topic == topics.READING:
+            elif topic == Topic.READING:
                 super().write_event_value(events.ZMQ_READING, body)
-            elif topic == topics.CYCLE:
+            elif topic == Topic.CYCLE:
                 super().write_event_value(events.ZMQ_CYCLE, body)
-            elif topic == topics.ALARM:
+            elif topic == Topic.ALARM:
                 super().write_event_value(events.ZMQ_ALARM, body)
-            elif topic == topics.OPERATION_MODE:
+            elif topic == Topic.OPERATION_MODE:
                 super().write_event_value(events.ZMQ_OPER_MODE, body)

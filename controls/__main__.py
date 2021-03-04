@@ -11,7 +11,7 @@ import controls.pcb as pcb
 import controls.states as states
 import controls.test_pcb as test_pcb
 from controls.context import Context
-from controls.messenger import Messenger
+from .ipc import pub, sub
 
 SERVO_GPIO = 15
 SERVO_MIN_WIDTH = 500
@@ -67,12 +67,10 @@ if __name__ == "__main__":
     gauge_ps = test_pcb.TestGauge()
     oxygen_sensor = test_pcb.TestOxygen()
 
-    # Initialize messenger
-    msg = Messenger()
-
     # Create system context
     ctx = Context(
-        msg,
+        pub,
+        sub,
         servo,
         dht_box,
         dht_air,

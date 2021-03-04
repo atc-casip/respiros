@@ -1,14 +1,14 @@
 from abc import ABCMeta, abstractmethod
 from typing import Dict
 
-import common.ipc.topics as topics
 import gui.events as events
 import gui.style as style
 import PySimpleGUI as sg
+from common.ipc import Topic
 from gui.components.alarm_card import AlarmCard
 from gui.config import cfg
 from gui.context import ctx
-from gui.messenger import msg
+from gui.ipc import pub
 
 from .sliders import IESlider, NumericSlider
 
@@ -239,8 +239,8 @@ class ParametersTab(ControlTab):
             change = True
 
         if change:
-            msg.send(
-                topics.OPERATION_PARAMS,
+            pub.send(
+                Topic.OPERATION_PARAMS,
                 {
                     "ipap": ctx.ipap,
                     "epap": ctx.epap,
@@ -436,8 +436,8 @@ class AlarmsTab(ControlTab):
         elif event == events.FREQ_MAX_SLIDER_OPER:
             self.freq_max.value = ctx.freq_max = int(values[event])
         elif event == events.APPLY_ALARMS_BUTTON_OPER:
-            msg.send(
-                topics.OPERATION_ALARMS,
+            pub.send(
+                Topic.OPERATION_ALARMS,
                 {
                     "pressure_min": ctx.pressure_min,
                     "pressure_max": ctx.pressure_max,
@@ -491,7 +491,7 @@ class HistoryTab(ControlTab):
 
     def handle_event(self, event: str, values: Dict):
         if event == events.SILENCE_ALARMS_BUTTON_OPER:
-            msg.send(topics.SILENCE_ALARMS, {})
+            pub.send(Topic.SILENCE_ALARMS, {})
 
     def refresh_alarms(self):
         for a, c in zip(ctx.alarms, self.alarm_cards):

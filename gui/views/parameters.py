@@ -1,12 +1,12 @@
 from typing import Dict
 
-import common.ipc.topics as topics
 import gui.events as events
 import PySimpleGUI as sg
+from common.ipc import Topic
 from gui.components import IESlider, NumericSlider
 from gui.config import cfg
 from gui.context import ctx
-from gui.messenger import msg
+from gui.ipc import pub
 
 from .operation import OperationView
 from .view import View
@@ -122,8 +122,8 @@ class ParametersView(View):
             ctx.inhale = self.ie.value[0]
             ctx.exhale = self.ie.value[1]
         elif event == events.START_BUTTON_PARAMS:
-            msg.send(
-                topics.OPERATION_PARAMS,
+            pub.send(
+                Topic.OPERATION_PARAMS,
                 {
                     "ipap": ctx.ipap,
                     "epap": ctx.epap,

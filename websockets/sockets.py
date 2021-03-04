@@ -4,10 +4,7 @@ Emit events to clients using WebSockets.
 
 import logging
 
-import gevent
 import socketio
-
-from .messenger import Messenger
 
 sio = socketio.Server(async_mode="gevent", cors_allowed_origins="*")
 app = socketio.WSGIApp(sio)
@@ -27,7 +24,7 @@ def disconnect(sid):
     logging.info("Client with ID %s disconnected", sid)
 
 
-def handle_messages(msg: Messenger):
+def handle_messages():
     """Main events' controller.
 
     This function listens for events on the internal ZeroMQ sockets and emits
@@ -36,7 +33,7 @@ def handle_messages(msg: Messenger):
     Args:
         messenger (Messenger): ZeroMQ messenger.
     """
-
+    """
     while True:
         [topic, body] = msg.recv(block=False)
         if topic == "operation":
@@ -70,3 +67,4 @@ def handle_messages(msg: Messenger):
             pass
 
         gevent.sleep(0.01)
+        """

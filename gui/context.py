@@ -1,15 +1,4 @@
-import datetime
-
 from .config import cfg
-
-
-class Alarm:
-    """Model for system alarms."""
-
-    def __init__(self, type: str, criticality: str, timestamp: float):
-        self.type = type
-        self.criticality = criticality
-        self.timestamp = datetime.datetime.fromtimestamp(timestamp)
 
 
 class Context:
