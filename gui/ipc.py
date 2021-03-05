@@ -6,7 +6,7 @@ SUB_ADDR = "ipc:///tmp/monitor"
 
 SYNC_CONTROLS = "ipc:///tmp/sync-controls"
 SYNC_GUI = "ipc:///tmp/sync-gui"
-SYNC_WEBSOCKETS = "ipc:///tmp/sync-websockets"
+SYNC_WEBSOCKETS = "ipc:///tmp/sync-api"
 
 ctx = zmq.Context()
 sub = Subscriber(

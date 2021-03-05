@@ -134,3 +134,6 @@ dmypy.json
 
 # profiling data
 .prof
+
+# Logs folder
+logs/

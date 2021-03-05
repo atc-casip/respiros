@@ -6,7 +6,7 @@ SUB_ADDR = "ipc:///tmp/operation"
 
 SYNC_CONTROLS = "ipc:///tmp/sync-controls"
 SYNC_GUI = "ipc:///tmp/sync-gui"
-SYNC_WEBSOCKETS = "ipc:///tmp/sync-websockets"
+SYNC_WEBSOCKETS = "ipc:///tmp/sync-api"
 
 ctx = zmq.Context()
 pub = Publisher(ctx, PUB_ADDR, {SYNC_GUI, SYNC_WEBSOCKETS})
