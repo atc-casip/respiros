@@ -1,35 +1,36 @@
-from typing import Tuple, Union
+from typing import Dict, Tuple, Union
 
-import gui.style as style
 import PySimpleGUI as sg
+from gui.component import Component
 
 
-class NumericSlider(sg.Column):
+class NumericSlider(Component):
     """Slider for numerical parameters."""
 
     def __init__(
         self,
+        app,
         label: str,
         metric: str,
         values: Tuple[int, int],
         default_value: int,
-        key: str,
     ):
+        super().__init__(app)
         self.__value = default_value
 
         self.title_label = sg.Text(
             label,
-            font=(style.FONT_FAMILY, style.FONT_SIZE_MEDIUM),
+            font=(app.config["FONT_FAMILY"], app.config["FONT_SIZE_MEDIUM"]),
         )
         self.metric_label = sg.Text(
             metric,
-            font=(style.FONT_FAMILY, style.FONT_SIZE_MEDIUM),
+            font=(app.config["FONT_FAMILY"], app.config["FONT_SIZE_MEDIUM"]),
         )
         self.value_label = sg.Text(
             default_value,
             size=(5, 1),
             justification="right",
-            font=(style.FONT_FAMILY, style.FONT_SIZE_MEDIUM),
+            font=(app.config["FONT_FAMILY"], app.config["FONT_SIZE_MEDIUM"]),
         )
         self.slider = sg.Slider(
             range=values,
@@ -38,14 +39,13 @@ class NumericSlider(sg.Column):
             orientation="h",
             size=(0, 50),
             enable_events=True,
-            key=key,
         )
 
-        super().__init__(
+        self.layout(
             [
                 [self.title_label, self.value_label, self.metric_label],
                 [self.slider],
-            ],
+            ]
         )
 
     @property
@@ -58,33 +58,39 @@ class NumericSlider(sg.Column):
         self.value_label.update(value)
         self.slider.update(value)
 
-    def expand(self):
-        super().expand(expand_x=True)
+    def handle_event(self, event: str, values: Dict):
+        if event == self.slider.Key:
+            self.value = int(values[event])
+
+    def show(self):
+        self.expand(expand_x=True)
         self.title_label.expand(expand_x=True)
         self.slider.expand(expand_x=True)
+        super().show()
 
 
-class IESlider(sg.Column):
+class IESlider(Component):
     """Special slider for the inhale-exhale relation."""
 
     def __init__(
         self,
+        app,
         inhale_max: int,
         exhale_max: int,
         default_value: Tuple[int, int],
-        key: str,
     ):
+        super().__init__(app)
         self.__value = self.__ie_to_int(default_value)
 
         self.title_label = sg.Text(
             "Relación I:E",
-            font=(style.FONT_FAMILY, style.FONT_SIZE_MEDIUM),
+            font=(app.config["FONT_FAMILY"], app.config["FONT_SIZE_MEDIUM"]),
         )
         self.value_label = sg.Text(
             f"{default_value[0]}:{default_value[1]}",
             size=(5, 1),
             justification="right",
-            font=(style.FONT_FAMILY, style.FONT_SIZE_MEDIUM),
+            font=(app.config["FONT_FAMILY"], app.config["FONT_SIZE_MEDIUM"]),
         )
         self.slider = sg.Slider(
             range=((inhale_max - 1) * -1, exhale_max - 1),
@@ -93,10 +99,9 @@ class IESlider(sg.Column):
             orientation="h",
             size=(0, 50),
             enable_events=True,
-            key=key,
         )
 
-        super().__init__([[self.title_label, self.value_label], [self.slider]])
+        self.layout([[self.title_label, self.value_label], [self.slider]])
 
     @property
     def value(self) -> Tuple[int, int]:
@@ -122,10 +127,15 @@ class IESlider(sg.Column):
             self.value_label.update(f"{value[0]}:{value[1]}")
             self.slider.update(self.__value)
 
-    def expand(self):
-        super().expand(expand_x=True)
+    def handle_event(self, event: str, values: Dict):
+        if event == self.slider.Key:
+            self.value = int(values[event])
+
+    def show(self):
+        self.expand(expand_x=True)
         self.title_label.expand(expand_x=True)
         self.slider.expand(expand_x=True)
+        super().show()
 
     def __ie_to_int(self, values: Tuple[int, int]) -> int:
         """Obtain the single integer version of the inhale-exhale relation.

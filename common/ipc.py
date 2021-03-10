@@ -2,7 +2,7 @@ import atexit
 import json
 import logging
 from enum import Enum, auto
-from typing import Dict, Set, Tuple
+from typing import Dict, List, Tuple
 
 import zmq
 
@@ -25,14 +25,14 @@ class PublisherError(Exception):
 
 
 class Publisher:
-    def __init__(self, ctx: zmq.Context, addr: str, subscribers: Set[str]):
+    def __init__(self, ctx: zmq.Context, addr: str, subscribers: List[str]):
         self.__ctx = ctx
         self.__socket = ctx.socket(zmq.PUB)
         atexit.register(self.__socket.close)
         self.__socket.bind(addr)
         self.__sync(subscribers)
 
-    def __sync(self, subscribers: Set[str]):
+    def __sync(self, subscribers: List[str]):
         sync_socket = self.__ctx.socket(zmq.REP)
         for sub in subscribers:
             sync_socket.bind(sub)
@@ -55,7 +55,7 @@ class Publisher:
 
 class Subscriber:
     def __init__(
-        self, ctx: zmq.Context, addr: str, topics: Set[Topic], sync_addr: str
+        self, ctx: zmq.Context, addr: str, topics: List[Topic], sync_addr: str
     ):
         self.__ctx = ctx
         self.__socket = ctx.socket(zmq.SUB)
@@ -133,7 +133,7 @@ class IPCBuilder:
         self.__ipc = IPCManager()
         return product
 
-    def build_publisher(self, addr: str, subscribers: Set[str]):
+    def build_publisher(self, addr: str, subscribers: List[str]):
         if self.__ipc.pub:
             raise PublisherError()
 
@@ -157,7 +157,7 @@ class IPCBuilder:
 
         self.__ipc.pub = pub
 
-    def build_subscriber(self, addr: str, topics: Set[Topic], sync_addr: str):
+    def build_subscriber(self, addr: str, topics: List[Topic], sync_addr: str):
         logging.info("Building subscriber on %s", addr)
         sub = self.__ctx.socket(zmq.SUB)
         sub.connect(addr)

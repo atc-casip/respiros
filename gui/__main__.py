@@ -1,7 +1,4 @@
-import logging
+from gui import create_app
 
-logging.basicConfig(filename="logs/gui.log", filemode="w", level=logging.INFO)
-
-from .app import App
-
-App().run()
+app = create_app()
+app.run()

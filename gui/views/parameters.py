@@ -1,87 +1,83 @@
 from typing import Dict
 
-import gui.events as events
 import PySimpleGUI as sg
 from common.ipc import Topic
-from gui.components import IESlider, NumericSlider
-from gui.config import cfg
-from gui.context import ctx
-from gui.ipc import pub
-
-from .operation import OperationView
-from .view import View
+from gui.component import Component
+from gui.views.operation import OperationView
+from gui.widgets.sliders import IESlider, NumericSlider
 
 
-class ParametersView(View):
+class ParametersView(Component):
     """Parameter selection for operation start."""
 
     def __init__(self, app):
+        super().__init__(
+            app, pad=(373, 0), visible=False, key="ParametersView"
+        )
+
         # Sliders
         self.ipap = NumericSlider(
-            "Presión IPAP",
+            app,
+            label="Presión IPAP",
             metric="cmH\N{SUBSCRIPT TWO}O",
-            values=(
-                cfg["params"]["ipap"]["min"],
-                cfg["params"]["ipap"]["max"],
-            ),
-            default_value=cfg["params"]["ipap"]["default"],
-            key=events.IPAP_SLIDER_PARAMS,
+            values=(app.config["IPAP_MIN"], app.config["IPAP_MAX"]),
+            default_value=app.config["IPAP_DEFAULT"],
         )
         self.epap = NumericSlider(
-            "Presión EPAP",
+            app,
+            label="Presión EPAP",
             metric="cmH\N{SUBSCRIPT TWO}O",
-            values=(
-                cfg["params"]["epap"]["min"],
-                cfg["params"]["epap"]["max"],
-            ),
-            default_value=cfg["params"]["epap"]["default"],
-            key=events.EPAP_SLIDER_PARAMS,
+            values=(app.config["EPAP_MIN"], app.config["EPAP_MAX"]),
+            default_value=app.config["EPAP_DEFAULT"],
         )
         self.freq = NumericSlider(
-            "Frecuencia",
+            app,
+            label="Frecuencia",
             metric="rpm",
-            values=(
-                cfg["params"]["freq"]["min"],
-                cfg["params"]["freq"]["max"],
-            ),
-            default_value=cfg["params"]["freq"]["default"],
-            key=events.FREQ_SLIDER_PARAMS,
+            values=(app.config["FREQ_MIN"], app.config["FREQ_MAX"]),
+            default_value=app.config["FREQ_DEFAULT"],
         )
         self.trigger = NumericSlider(
-            "Trigger de flujo",
+            app,
+            label="Trigger de flujo",
             metric="ml",
-            values=(
-                cfg["params"]["trigger"]["min"],
-                cfg["params"]["trigger"]["max"],
-            ),
-            default_value=cfg["params"]["trigger"]["default"],
-            key=events.TRIGGER_SLIDER_PARAMS,
+            values=(app.config["TRIGGER_MIN"], app.config["TRIGGER_MAX"]),
+            default_value=app.config["TRIGGER_DEFAULT"],
         )
         self.ie = IESlider(
-            inhale_max=cfg["params"]["inhale"]["max"],
-            exhale_max=cfg["params"]["exhale"]["max"],
+            app,
+            inhale_max=app.config["INHALE_MAX"],
+            exhale_max=app.config["EXHALE_MAX"],
             default_value=(
-                cfg["params"]["inhale"]["default"],
-                cfg["params"]["exhale"]["default"],
+                app.config["INHALE_DEFAULT"],
+                app.config["EXHALE_DEFAULT"],
             ),
-            key=events.IE_SLIDER_PARAMS,
         )
 
         # Buttons
         self.start_btn = sg.Button(
             "Comenzar",
             size=(10, 2),
-            font=("Helvetica", 12),
-            key=events.START_BUTTON_PARAMS,
+            font=(app.config["FONT_FAMILY"], app.config["FONT_SIZE_SMALL"]),
         )
 
-        super().__init__(
-            app,
+        self.children = [
+            self.ipap,
+            self.epap,
+            self.freq,
+            self.trigger,
+            self.ie,
+        ]
+        self.layout(
             [
                 [
                     sg.Text(
                         "Seleccione los parámetros de operación",
-                        font=("Helvetica", 20, "bold"),
+                        font=(
+                            app.config["FONT_FAMILY"],
+                            app.config["FONT_SIZE_BIG"],
+                            "bold",
+                        ),
                     )
                 ],
                 [self.ipap],
@@ -90,47 +86,38 @@ class ParametersView(View):
                 [self.trigger],
                 [self.ie],
                 [self.start_btn],
-            ],
-            pad=(373, 0),
+            ]
         )
 
-    def show(self):
-        super().expand(expand_x=True, expand_y=True)
-        self.ipap.expand()
-        self.epap.expand()
-        self.freq.expand()
-        self.trigger.expand()
-        self.ie.expand()
-
-        super().show()
-
     def handle_event(self, event: str, values: Dict):
-        if event == events.IPAP_SLIDER_PARAMS:
-            self.ipap.value = ctx.ipap = int(values[event])
-            if self.ipap.value <= self.epap.value:
-                self.epap.value = ctx.epap = self.ipap.value - 1
-        elif event == events.EPAP_SLIDER_PARAMS:
-            self.epap.value = ctx.epap = int(values[event])
-            if self.epap.value >= self.ipap.value:
-                self.ipap.value = ctx.ipap = self.epap.value + 1
-        elif event == events.FREQ_SLIDER_PARAMS:
-            self.freq.value = ctx.freq = int(values[event])
-        elif event == events.TRIGGER_SLIDER_PARAMS:
-            self.trigger.value = ctx.trigger = int(values[event])
-        elif event == events.IE_SLIDER_PARAMS:
-            self.ie.value = int(values[event])
-            ctx.inhale = self.ie.value[0]
-            ctx.exhale = self.ie.value[1]
-        elif event == events.START_BUTTON_PARAMS:
-            pub.send(
+        super().handle_event(event, values)
+        if event == self.start_btn.Key:
+            self.app.ipc.send(
                 Topic.OPERATION_PARAMS,
                 {
-                    "ipap": ctx.ipap,
-                    "epap": ctx.epap,
-                    "freq": ctx.freq,
-                    "trigger": ctx.trigger,
-                    "inhale": ctx.inhale,
-                    "exhale": ctx.exhale,
+                    "ipap": self.app.ctx.ipap,
+                    "epap": self.app.ctx.epap,
+                    "freq": self.app.ctx.freq,
+                    "trigger": self.app.ctx.trigger,
+                    "inhale": self.app.ctx.inhale,
+                    "exhale": self.app.ctx.exhale,
                 },
             )
             self.app.show_view(OperationView)
+
+        self.app.ctx.ipap = self.ipap.value
+        self.app.ctx.epap = self.epap.value
+        self.app.ctx.freq = self.freq.value
+        self.app.ctx.trigger = self.trigger.value
+        self.app.ctx.inhale = self.ie.value[0]
+        self.app.ctx.exhale = self.ie.value[1]
+
+        if self.ipap.value <= self.epap.value:
+            if event == self.ipap.slider.Key:
+                self.app.ctx.epap = self.epap.value = self.ipap.value - 1
+            else:
+                self.app.ctx.ipap = self.ipap.value = self.epap.value + 1
+
+    def show(self):
+        self.expand(expand_x=True, expand_y=True)
+        super().show()

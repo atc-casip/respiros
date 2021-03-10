@@ -4,7 +4,7 @@ from flask import Flask
 
 from api.config import DevelopmentConfig
 from api.ipc import ipc
-from api.sockets import socketio, ipc_watchdog
+from api.sockets import socketio
 
 
 def create_app() -> Flask:
@@ -28,9 +28,7 @@ def create_app() -> Flask:
         filename="logs/api.log", filemode="w", level=logging_level
     )
 
-    ipc.init_app(app)
     socketio.init_app(app)
-
-    socketio.start_background_task(ipc_watchdog, app.ipc)
+    ipc.init_app(app)
 
     return app

@@ -1,34 +1,19 @@
-import threading
-
 import PySimpleGUI as sg
-from common.ipc import Topic
+from flask.config import Config
 
-import gui.events as events
-import gui.style as style
-import gui.views as views
-from gui.ipc import sub
+sg.theme("Black")  # Use the dark theme
 
 
-class App(sg.Window):
+class GUIApplication(sg.Window):
     """The ventilator's GUI application.
 
     Monitoring data is shown to users, who can also control the system with
     their inputs.
     """
 
-    def __init__(self, initial_view=views.LoadingView):
-        sg.theme(style.THEME)
-
+    def __init__(self):
         super().__init__("RespirOS", size=(1366, 768), margins=(10, 10))
-
-        self.__views = {}
-        for v in map(views.__dict__.get, views.__all__):
-            self.__views[v.__name__] = v(self)
-
-        super().layout([list(self.__views.values())]).finalize()
-
-        self.__current_view = self.__views[initial_view.__name__]
-        self.__current_view.show()
+        self.config = Config({})
 
     def show_view(self, view):
         """Show the specified view.
@@ -41,36 +26,14 @@ class App(sg.Window):
             view : The class of the view to show.
         """
 
-        self.__current_view.hide()
-        self.__current_view = self.__views[view.__name__]
-        self.__current_view.show()
+        self.current_view.hide()
+        self.current_view = self.views[view.__name__]
+        self.current_view.show()
 
     def run(self):
         """Main loop of the application."""
 
-        threading.Thread(target=self.check_ipc, daemon=True).start()
-
+        self.current_view.show()
         while True:
             event, values = super().read()
-            self.__current_view.handle_event(event, values)
-
-    def check_ipc(self):
-        """Receive messages from other system processes.
-
-        This function is meant to be run on a different thread than the main
-        loop. When a new message is received, it is sent to the window just
-        like a normal event, so it can be handled by the views.
-        """
-
-        while True:
-            topic, body = sub.recv()
-            if topic == Topic.CHECK:
-                super().write_event_value(events.ZMQ_CHECK, body)
-            elif topic == Topic.READING:
-                super().write_event_value(events.ZMQ_READING, body)
-            elif topic == Topic.CYCLE:
-                super().write_event_value(events.ZMQ_CYCLE, body)
-            elif topic == Topic.ALARM:
-                super().write_event_value(events.ZMQ_ALARM, body)
-            elif topic == Topic.OPERATION_MODE:
-                super().write_event_value(events.ZMQ_OPER_MODE, body)
+            self.current_view.handle_event(event, values)
