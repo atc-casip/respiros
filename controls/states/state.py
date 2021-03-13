@@ -1,47 +1,20 @@
-"""
-Definition of the state machine and base state class for the control system.
-"""
-
-from abc import ABC, abstractmethod
-from typing import Dict
-
-from controls.context import Context
-
-from .events import Event
+from abc import ABCMeta, abstractmethod
 
 
-class State(ABC):
+class State(metaclass=ABCMeta):
     """
     Base state class.
     """
 
-    def __init__(self, ctx: Context):
-        self.ctx = ctx
+    def __init__(self, app):
+        self.app = app
 
     @abstractmethod
-    def transitions(self) -> Dict:
-        """
-        Generate transition map for the state.
+    def run(self):
+        """Execute the state's logic.
+
+        This method can return when a transition to another state needs to be
+        made.
         """
 
         return
-
-    @abstractmethod
-    def run(self) -> Event:
-        """
-        Execute the state's logic and return the event for the next transition.
-        """
-
-        return
-
-    def next(self, event: Event):
-        """
-        Based on the given event, determine the next state.
-        """
-
-        transitions = self.transitions()
-        if type(event) in transitions:
-            if event.payload:
-                return transitions[type(event)](self.ctx, event.payload)
-            return transitions[type(event)](self.ctx)
-        raise "Event not supported for current state"

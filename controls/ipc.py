@@ -1,18 +1,32 @@
-import zmq
-from common.ipc import Publisher, Subscriber, Topic
+from common.ipc import IPCBuilder, Topic
 
-PUB_ADDR = "ipc:///tmp/monitor"
-SUB_ADDR = "ipc:///tmp/operation"
 
-SYNC_CONTROLS = "ipc:///tmp/sync-controls"
-SYNC_GUI = "ipc:///tmp/sync-gui"
-SYNC_WEBSOCKETS = "ipc:///tmp/sync-api"
+class IPCDirector:
+    """Director used for building the correct manager.
 
-ctx = zmq.Context()
-pub = Publisher(ctx, PUB_ADDR, {SYNC_GUI, SYNC_WEBSOCKETS})
-sub = Subscriber(
-    ctx,
-    SUB_ADDR,
-    {Topic.OPERATION_PARAMS, Topic.OPERATION_ALARMS, Topic.REQUEST_READING},
-    SYNC_CONTROLS,
-)
+    Makes use of the manager builder.
+    """
+
+    def __init__(self, app=None):
+        self.__builder = IPCBuilder()
+        if app is not None:
+            self.init_app(app)
+
+    def init_app(self, app):
+        self.__builder.build_publisher(
+            app.config["ZMQ_MONITOR_ADDR"],
+            [app.config["ZMQ_SYNC_GUI_ADDR"], app.config["ZMQ_SYNC_API_ADDR"]],
+        )
+        self.__builder.build_subscriber(
+            app.config["ZMQ_OPERATION_ADDR"],
+            [
+                Topic.OPERATION_PARAMS,
+                Topic.OPERATION_ALARMS,
+                Topic.REQUEST_READING,
+            ],
+            app.config["ZMQ_SYNC_CONTROLS_ADDR"],
+        )
+        app.ipc = self.__builder.manager
+
+
+ipc = IPCDirector()

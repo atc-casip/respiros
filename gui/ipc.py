@@ -56,10 +56,13 @@ class IPCDirector:
                 app.write_event_value(ZMQEvent.READING.name, body)
             elif topic == Topic.CYCLE:
                 app.write_event_value(ZMQEvent.CYCLE.name, body)
-            elif topic == Topic.ALARM:
-                app.write_event_value(ZMQEvent.ALARM.name, body)
             elif topic == Topic.OPERATION_MODE:
                 app.write_event_value(ZMQEvent.OPER_MODE.name, body)
+            # FIXME: Controls sends an alarm all the time and blocks the GUI
+            """
+            elif topic == Topic.ALARM:
+                app.write_event_value(ZMQEvent.ALARM.name, body)
+            """
 
 
 ipc = IPCDirector()

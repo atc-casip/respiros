@@ -1,7 +1,3 @@
-"""
-This module provides the utilities for working with servos.
-"""
-
 import atexit
 import logging
 

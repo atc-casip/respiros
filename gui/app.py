@@ -1,3 +1,4 @@
+import logging
 import PySimpleGUI as sg
 from flask.config import Config
 
@@ -15,6 +16,14 @@ class GUIApplication(sg.Window):
         super().__init__("RespirOS", size=(1366, 768), margins=(10, 10))
         self.config = Config({})
 
+    def run(self):
+        """Main loop of the application."""
+
+        self.current_view.show()
+        while True:
+            event, values = super().read()
+            self.current_view.handle_event(event, values)
+
     def show_view(self, view):
         """Show the specified view.
 
@@ -23,17 +32,10 @@ class GUIApplication(sg.Window):
         to navigation by making the views visible and invisible.
 
         Args:
-            view : The class of the view to show.
+            view: The class of the view to show.
         """
 
+        logging.info("Showing view %s", view.__name__)
         self.current_view.hide()
         self.current_view = self.views[view.__name__]
         self.current_view.show()
-
-    def run(self):
-        """Main loop of the application."""
-
-        self.current_view.show()
-        while True:
-            event, values = super().read()
-            self.current_view.handle_event(event, values)

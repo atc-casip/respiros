@@ -1,16 +1,11 @@
-"""
-System checks that are performed to validate its health.
-"""
-
 import logging
 import time
-from typing import Dict, Tuple
+from typing import Tuple
 
 from common.ipc import Topic
 
-from .events import ChecksSuccessful, ChecksUnsuccessful, Event
-from .failure import Failure
-from .stand_by import StandBy
+from .failure import FailureState
+from .stand_by import StandByState
 from .state import State
 
 BOX_TMP_MIN = 10  # ºC
@@ -29,15 +24,10 @@ AIRFLOW_MIN = 0  # l/min
 AIRFLOW_MAX = 40  # l/min
 
 
-class SelfCheck(State):
-    """
-    Initial state where the device's status is checked.
-    """
+class SelfCheckState(State):
+    """Initial state where the device's status is checked."""
 
-    def transitions(self) -> Dict[Event, State]:
-        return {ChecksSuccessful: StandBy, ChecksUnsuccessful: Failure}
-
-    def run(self) -> Event:
+    def run(self):
         # TODO: Call the actual functions instead of using static values
 
         dht_box_ok = True
@@ -74,7 +64,7 @@ class SelfCheck(State):
         # We need to wait a bit so the GUI application can catch up
         time.sleep(2)
 
-        self.ctx.pub.send(
+        self.app.ipc.send(
             Topic.CHECK,
             {
                 "dht_box": dht_box_ok,
@@ -98,8 +88,9 @@ class SelfCheck(State):
                 atm_ok,
             ]
         ):
-            return ChecksSuccessful(None)
-        return ChecksUnsuccessful(None)
+            self.app.transition_to(StandByState)
+        else:
+            self.app.transition_to(FailureState)
 
     def __check_dht_box(self) -> bool:
         """
@@ -107,9 +98,9 @@ class SelfCheck(State):
         """
 
         for _ in range(3):
-            self.ctx.dht_box.trigger()
-            tmp = self.ctx.dht_box.temperature()
-            hum = self.ctx.dht_box.humidity()
+            self.app.pcb.dht_box.trigger()
+            tmp = self.app.pcb.dht_box.temperature()
+            hum = self.app.pcb.dht_box.humidity()
             if (
                 BOX_TMP_MIN <= tmp <= BOX_TMP_MAX
                 or BOX_HUM_MIN <= hum <= BOX_HUM_MAX
@@ -125,8 +116,8 @@ class SelfCheck(State):
         """
 
         for _ in range(3):
-            self.ctx.dht_air.trigger()
-            tmp = self.ctx.dht_air.temperature()
+            self.app.pcb.dht_air.trigger()
+            tmp = self.app.pcb.dht_air.temperature()
             if AIR_TMP_MIN <= tmp <= AIR_TMP_MAX:
                 return True
             time.sleep(2)
@@ -149,10 +140,10 @@ class SelfCheck(State):
         angles = [0, 180]
         for _ in range(3):
             for angle in angles:
-                self.ctx.servo.set_angle(angle)
+                self.app.pcb.servo.set_angle(angle)
                 time.sleep(0.5)
-                gauge_pressure = self.ctx.gauge_pressure_sensor.read()
-                airflow_pressure = self.ctx.airflow_pressure_sensor.read()
+                gauge_pressure = self.app.pcb.gauge_ps.read()
+                airflow_pressure = self.app.pcb.airflow_ps.read()
 
                 if (
                     angle == 0
@@ -197,7 +188,7 @@ class SelfCheck(State):
         Check oxygen sensor.
         """
 
-        oxygen_percentage = self.ctx.oxygen_sensor.read()
+        oxygen_percentage = self.app.pcb.oxygen_sensor.read()
         if OXYGEN_MIN <= oxygen_percentage <= OXYGEN_MAX:
             return True
 
@@ -208,7 +199,7 @@ class SelfCheck(State):
         Check ambient pressure sensor.
         """
 
-        atm_pressure = self.ctx.atm_ps.read()
+        atm_pressure = self.app.pcb.atm_ps.read()
         if ATM_MIN <= atm_pressure <= ATM_MAX:
             return True
 

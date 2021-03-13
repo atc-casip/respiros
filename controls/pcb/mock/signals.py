@@ -1,7 +1,6 @@
-import matplotlib.pyplot as plt
 import numpy as np
 
-## Fuente de datos 1
+# Fuente de datos 1
 interval = 0.01
 maxtime1 = 0.5
 time1 = np.arange(0, maxtime1, interval)
@@ -21,7 +20,7 @@ flux = np.concatenate([flux, flux, flux, flux, flux])
 flux = flux + (np.random.rand(len(flux)) - 0.5) * 2.5
 time = np.arange(0, maxTime * 5, interval)
 
-## Fuente de datos 2
+# Fuente de datos 2
 pressure1 = np.ones(len(time1) + len(time2)) * 2
 pressure2 = pressure1 + 18
 pressure = np.concatenate([pressure2, pressure1])

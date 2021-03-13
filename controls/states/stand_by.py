@@ -1,34 +1,23 @@
-"""
-Before starting operation, the system waits for the user to define the
-necessary parameters.
-"""
-
 import logging
 import time
-from typing import Dict
 
-import zmq
 from common.ipc import Topic
 
-from .events import Event, StartOperationControlled
-from .operation import OperationControlled
+from .operation import OperationState
 from .state import State
 
 MEAN_CALIBRATION_LENGTH = 200
 
 
-class StandBy(State):
-    """
-    Waiting for the user to select an operation mode.
+class StandByState(State):
+    """In this state, the system is waiting for the user to introduce the
+    initial operation parameters.
     """
 
-    def transitions(self) -> Dict[Event, State]:
-        return {StartOperationControlled: OperationControlled}
-
-    def run(self) -> Event:
+    def run(self):
         airflow_offset = 0.0
         gauge_offset = 0.0
-        self.ctx.servo.set_angle(60)
+        self.app.pcb.servo.set_angle(60)
         time_saved = time.time()
         time_start = 10.0
 
@@ -38,38 +27,40 @@ class StandBy(State):
                 (MEAN_CALIBRATION_LENGTH - 1) / MEAN_CALIBRATION_LENGTH
             ) * airflow_offset + (
                 1 / MEAN_CALIBRATION_LENGTH
-            ) * self.ctx.airflow_ps.read()
+            ) * self.app.pcb.airflow_ps.read()
 
             gauge_offset = (
                 (MEAN_CALIBRATION_LENGTH - 1) / MEAN_CALIBRATION_LENGTH
             ) * gauge_offset + (
                 1 / MEAN_CALIBRATION_LENGTH
-            ) * self.ctx.gauge_ps.read()
+            ) * self.app.pcb.gauge_ps.read()
 
-            try:
-                [topic, msg] = self.ctx.sub.recv(block=False)
-                if topic == Topic.OPERATION_PARAMS:
-                    logging.info("Time: %f", time.time() - time_saved)
-                    # Airflow and gauge continue calibration
-                    while time.time() < time_saved + time_start:
-                        airflow_offset = (
-                            (MEAN_CALIBRATION_LENGTH - 1)
-                            / MEAN_CALIBRATION_LENGTH
-                        ) * airflow_offset + (
-                            1 / MEAN_CALIBRATION_LENGTH
-                        ) * self.ctx.airflow_ps.read()
+            topic, body = self.app.ipc.recv(block=False)
+            if topic == Topic.OPERATION_PARAMS:
+                self.app.ctx.ipap = body["ipap"]
+                self.app.ctx.epap = body["epap"]
+                self.app.ctx.freq = body["freq"]
+                self.app.ctx.trigger = body["trigger"]
+                self.app.ctx.inhale = body["inhale"]
+                self.app.ctx.exhale = body["exhale"]
 
-                        gauge_offset = (
-                            (MEAN_CALIBRATION_LENGTH - 1)
-                            / MEAN_CALIBRATION_LENGTH
-                        ) * gauge_offset + (
-                            1 / MEAN_CALIBRATION_LENGTH
-                        ) * self.ctx.gauge_ps.read()
+                logging.info("Time: %f", time.time() - time_saved)
+                # Airflow and gauge continue calibration
+                while time.time() < time_saved + time_start:
+                    airflow_offset = (
+                        (MEAN_CALIBRATION_LENGTH - 1) / MEAN_CALIBRATION_LENGTH
+                    ) * airflow_offset + (
+                        1 / MEAN_CALIBRATION_LENGTH
+                    ) * self.app.pcb.airflow_ps.read()
 
-                        time.sleep(0.0001)
-                    break
-            except zmq.Again:
-                pass
+                    gauge_offset = (
+                        (MEAN_CALIBRATION_LENGTH - 1) / MEAN_CALIBRATION_LENGTH
+                    ) * gauge_offset + (
+                        1 / MEAN_CALIBRATION_LENGTH
+                    ) * self.app.pcb.gauge_ps.read()
+
+                    time.sleep(0.0001)
+                break
 
             time.sleep(0.0001)
 
@@ -78,13 +69,13 @@ class StandBy(State):
         )
         gauge_voltage_offset = self.__calculate_voltage_gauge(gauge_offset)
 
-        self.ctx.airflow_ps.func = lambda v: (
+        self.app.pcb.airflow_ps.func = lambda v: (
             -19.269 * (v - (airflow_voltage_offset - 2.0963)) ** 2
             + 172.15 * (v - (airflow_voltage_offset - 2.0963))
             - 276.2
         )
 
-        self.ctx.gauge_ps.func = lambda v: (
+        self.app.pcb.gauge_ps.func = lambda v: (
             10.971 * (v - (gauge_voltage_offset - 0.54269)) - 5.9539
         )
 
@@ -94,23 +85,13 @@ class StandBy(State):
         logging.info("Gauge offset: %f", gauge_offset)
 
         logging.info("Starting operation in controlled mode")
-        logging.info("IPAP -> %d", msg["ipap"])
-        logging.info("EPAP -> %d", msg["epap"])
-        logging.info("Frequency -> %d", msg["freq"])
-        logging.info("Trigger -> %d", msg["trigger"])
-        logging.info("I:E -> %d:%d", msg["inhale"], msg["exhale"])
+        logging.info("IPAP -> %d", body["ipap"])
+        logging.info("EPAP -> %d", body["epap"])
+        logging.info("Frequency -> %d", body["freq"])
+        logging.info("Trigger -> %d", body["trigger"])
+        logging.info("I:E -> %d:%d", body["inhale"], body["exhale"])
 
-        return StartOperationControlled(
-            {
-                "ipap": msg["ipap"],
-                "epap": msg["epap"],
-                "freq": msg["freq"],
-                "inhale": msg["inhale"],
-                "exhale": msg["exhale"],
-                "trigger": msg["trigger"],
-                "from_standby": True,
-            }
-        )
+        self.app.transition_to(OperationState)
 
     def __calculate_voltage_airflow(self, airflow_offset):
         return (
