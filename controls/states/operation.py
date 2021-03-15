@@ -55,7 +55,7 @@ class OperationState(State):
         # Sensor measurements timestamp
         # FIXME: Possibly needs to be initialized
         # on first execution of the state
-        self.sensors_time_saved = time.time()
+        self.sensors_time_saved = 0.0
         self.oxygen_time_saved = 0
         self.dht_time_saved = 0
 
@@ -94,9 +94,9 @@ class OperationState(State):
 
     def run(self):
         # Initializations
-        self.sensors_time_saved = time.time()
         insp_exp = False  # Start in inhalation
         self.time_saved = time.time()  # Get time reference
+        self.sensors_time_saved = time.time()
         self.operation = False  # Start in control operation mode
         self.__get_ie_durations()  # Obtain initial cycle, I and E durations
 
@@ -462,18 +462,46 @@ class OperationState(State):
     def __check_alarms(self):
         """Check if any alarms triggered."""
 
-        triggered = []
-        if self.epap_read < self.app.ctx.pressure_min:
-            triggered.append(Alarm(Type.PRESSURE_MIN, Criticality.MEDIUM))
-        elif self.ipap_read > self.app.ctx.pressure_max:
-            triggered.append(Alarm(Type.PRESSURE_MAX, Criticality.MEDIUM))
+        outbound = []
+        timestamp = datetime.now()
+        for alarm in self.app.ctx.alarms:
+            if alarm.type == Type.PRESSURE_MIN:
+                if self.epap_read < self.app.ctx.pressure_min:
+                    if alarm.criticality == Criticality.NONE:
+                        alarm.criticality = Criticality.MEDIUM
+                        alarm.timestamp = timestamp
+                        outbound.append(alarm)
+                    elif alarm.criticality == Criticality.MEDIUM:
+                        pass
+                elif alarm.criticality in {
+                    Criticality.MEDIUM,
+                    Criticality.HIGH,
+                }:
+                    alarm.criticality = Criticality.NONE
+                    alarm.timestamp = timestamp
+                    outbound.append(alarm)
+            elif alarm.type == Type.PRESSURE_MAX:
+                if self.ipap_read > self.app.ctx.pressure_max:
+                    if alarm.criticality == Criticality.NONE:
+                        alarm.criticality = Criticality.MEDIUM
+                        alarm.timestamp = timestamp
+                        outbound.append(alarm)
+                    elif alarm.criticality == Criticality.MEDIUM:
+                        pass
+                elif alarm.criticality in {
+                    Criticality.MEDIUM,
+                    Criticality.HIGH,
+                }:
+                    alarm.criticality = Criticality.NONE
+                    alarm.timestamp = timestamp
+                    outbound.append(alarm)
 
-        for alarm in triggered:
+        for alarm in outbound:
             self.app.ipc.send(
                 Topic.ALARM,
                 {
                     "type": alarm.type.name,
                     "criticality": alarm.criticality.name,
-                    "timestamp": datetime.now().timestamp(),
+                    "timestamp": alarm.timestamp.timestamp(),
                 },
             )

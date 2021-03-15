@@ -1,7 +1,8 @@
 from dataclasses import dataclass
-from typing import List
+from datetime import datetime
+from typing import Set
 
-from common.alarms import Alarm
+from common.alarms import Alarm, Type, Criticality
 
 
 @dataclass
@@ -28,7 +29,7 @@ class Context:
     oxygen_max: int
     freq_max: int
 
-    alarms: List[Alarm]
+    alarms: Set[Alarm]
 
     def __init__(self, app=None):
         if app is not None:
@@ -52,7 +53,10 @@ class Context:
         self.oxygen_max = app.config["ALARM_OXYGEN_MAX"]
         self.freq_max = app.config["ALARM_FREQ_MAX"]
 
-        self.alarms = []
+        timestamp = datetime.now()
+        self.alarms = set(
+            [Alarm(t, Criticality.NONE, timestamp) for t in Type]
+        )
 
         app.ctx = self
 
