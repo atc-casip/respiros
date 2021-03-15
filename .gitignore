@@ -137,3 +137,6 @@ dmypy.json
 
 # Logs folder
 logs/
+
+# VSCode config files
+.vscode/
