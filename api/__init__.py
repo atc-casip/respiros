@@ -1,8 +1,9 @@
 import logging
+import os
 
 from flask import Flask
 
-from api.config import DevelopmentConfig
+from api.config import Config, DevelopmentConfig
 from api.ipc import ipc
 from api.sockets import socketio
 
@@ -18,7 +19,10 @@ def create_app() -> Flask:
 
     app = Flask(__name__)
 
-    app.config.from_object(DevelopmentConfig)
+    if os.environ.get("ENV") == "development":
+        app.config.from_object(DevelopmentConfig)
+    else:
+        app.config.from_object(Config)
 
     if app.config["DEBUG"]:
         logging_level = logging.INFO

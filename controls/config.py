@@ -4,6 +4,8 @@ from common.config import BaseConfig
 class Config(BaseConfig):
     """Base configuration for the control application."""
 
+    MOCK = False
+
     DHT_BOX_GPIO = 16
     DHT_AIR_GPIO = 16
 
@@ -22,5 +24,12 @@ class Config(BaseConfig):
 
 class DevelopmentConfig(Config):
     """Configuration for the development environment."""
+
+    DEBUG = True
+    MOCK = True
+
+
+class TestingConfig(Config):
+    """Configuration for the test environment."""
 
     DEBUG = True

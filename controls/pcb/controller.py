@@ -35,7 +35,7 @@ class PCBController:
             self.init_app(app)
 
     def init_app(self, app):
-        if app.config["DEBUG"]:
+        if app.config["MOCK"]:
             # Create mock components
             self.dht_box = MockDHTSensor((10, 50), (0, 100))
             self.dht_air = MockDHTSensor((10, 50), (0, 100))

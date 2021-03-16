@@ -1,4 +1,5 @@
 import logging
+
 import PySimpleGUI as sg
 from flask.config import Config
 
